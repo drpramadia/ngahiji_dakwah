@@ -3,6 +3,7 @@ node_modules
 out
 coverage
 tsconfig.tsbuildinfo
+supabase/.temp/
 .env
 .env*.local
 .DS_Store

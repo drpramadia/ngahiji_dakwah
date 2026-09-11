@@ -61,7 +61,14 @@ npm run build
 
 ## Supabase Staging Migration
 
-Migration draft: `supabase/migrations/20260911000100_foundation.sql`.
+Migrations:
+
+- `supabase/migrations/20260911000100_foundation.sql`
+- `supabase/migrations/20260911000200_content_foundation.sql`
+
+Initial content seed:
+
+- `supabase/seed/initial_content.sql`
 
 Do not run it against production. Before staging:
 
@@ -69,9 +76,20 @@ Do not run it against production. Before staging:
 2. Review `docs/sql-audit.md`.
 3. Confirm organizer provisioning strategy.
 4. Confirm event media storage strategy.
-5. Run the migration only from a local Supabase CLI or approved CI path against staging.
-6. Seed only non-secret test data.
+5. Run migrations only from a local Supabase CLI or approved CI path against staging.
+6. Seed only non-secret initial content.
 7. Verify RLS with anon and authenticated test users before adding auth/order/payment work.
+
+Current CLI workflow uses the project-local CLI:
+
+```bash
+npx supabase migration list
+npx supabase db push --linked --dry-run
+npx supabase db push --linked --skip-vault
+npx supabase db query --linked --file supabase/seed/initial_content.sql
+```
+
+Never use `supabase db reset` against the linked remote project.
 
 ## Original Files
 
