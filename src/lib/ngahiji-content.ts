@@ -24,6 +24,7 @@ export interface CommunityRecord {
 
 export interface PublicContentRepository {
   getStories(): Promise<StoryRecord[]>;
+  getStoryBySlug(slug: string): Promise<StoryRecord | null>;
   getCommunities(): Promise<CommunityRecord[]>;
 }
 
@@ -80,6 +81,9 @@ export function createDemoContentRepository(stories: StoryRecord[], communities:
     async getStories() {
       return structuredClone(snapshot.stories.filter((story) => story.status === 'PUBLISHED'));
     },
+    async getStoryBySlug(slug) {
+      return structuredClone(snapshot.stories.find((story) => story.slug === slug && story.status === 'PUBLISHED') ?? null);
+    },
     async getCommunities() {
       return structuredClone(snapshot.communities.filter((community) => community.status === 'PUBLISHED'));
     }
@@ -118,6 +122,16 @@ export function createSupabaseContentRepository(config: {
         limit: '12'
       })).map(parseStory);
     },
+    async getStoryBySlug(slug) {
+      if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) return null;
+      const rows = await query('media_items', {
+        select: 'slug,title,category,format,published_at,reading_time,image_url,excerpt,body,status',
+        status: 'eq.PUBLISHED',
+        slug: 'eq.' + slug,
+        limit: '1'
+      });
+      return rows.length ? parseStory(rows[0]) : null;
+    },
     async getCommunities() {
       return (await query('communities', {
         select: 'slug,name,mark,color,description,status',
@@ -132,6 +146,7 @@ export function createSupabaseContentRepository(config: {
 export function createPublicContentService(repository: PublicContentRepository) {
   return {
     getStories: () => repository.getStories(),
+    getStoryBySlug: (slug: string) => repository.getStoryBySlug(slug),
     getCommunities: () => repository.getCommunities(),
     async getFeaturedStories() {
       return (await repository.getStories()).slice(0, 3);

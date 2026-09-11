@@ -43,7 +43,7 @@ export default async function AdminEventsPage() {
                 <span>{ticket ? `${ticket.name} · ${money(ticket.price_idr)} · quota ${ticket.quota}` : 'No ticket type'}</span>
                 <span className="admin-actions">
                   <Link href={`/admin/events/${event.id}`}>Edit</Link>
-                  <Link href={`/#events`}>Preview</Link>
+                  <Link href={`/events/${event.slug}`}>Preview</Link>
                   <form action={setEventStatusAction}><input type="hidden" name="id" value={event.id} /><input type="hidden" name="status" value="PUBLISHED" /><button type="submit">Publish</button></form>
                   <form action={setEventStatusAction}><input type="hidden" name="id" value={event.id} /><input type="hidden" name="status" value="DRAFT" /><button type="submit">Unpublish</button></form>
                   <form action={setEventStatusAction}><input type="hidden" name="id" value={event.id} /><input type="hidden" name="status" value="ARCHIVED" /><button type="submit">Archive</button></form>

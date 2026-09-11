@@ -11,6 +11,12 @@ describe('public content service', () => {
     await expect(service.getCommunities()).resolves.toHaveLength(6);
   });
 
+  it('finds a published story by slug', async () => {
+    await expect(service.getStoryBySlug('ngahiji-gerakan-bersama')).resolves.toMatchObject({
+      title: 'Ngahiji: Lebih dari Sekadar Event, Tapi Gerakan Bersama'
+    });
+  });
+
   it('rejects unpublished stories from public parsing', () => {
     expect(() => parseStory({ ...demoStories[0], status: 'DRAFT' })).toThrow('unpublished');
   });

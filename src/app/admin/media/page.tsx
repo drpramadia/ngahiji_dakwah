@@ -37,7 +37,7 @@ export default async function AdminMediaPage() {
               <span>{formatDate(item.published_at)}</span>
               <span className="admin-actions">
                 <Link href={`/admin/media/${item.id}`}>Edit</Link>
-                <Link href={`/#media`}>Preview</Link>
+                <Link href={`/media/${item.slug}`}>Preview</Link>
                 <form action={setMediaStatusAction}><input type="hidden" name="id" value={item.id} /><input type="hidden" name="status" value="PUBLISHED" /><button type="submit">Publish</button></form>
                 <form action={setMediaStatusAction}><input type="hidden" name="id" value={item.id} /><input type="hidden" name="status" value="DRAFT" /><button type="submit">Unpublish</button></form>
                 <form action={setMediaStatusAction}><input type="hidden" name="id" value={item.id} /><input type="hidden" name="status" value="ARCHIVED" /><button type="submit">Archive</button></form>

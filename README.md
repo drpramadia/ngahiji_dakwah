@@ -180,6 +180,15 @@ Not active yet:
 - community moderation
 - member-only content
 
+## Dynamic Public Routes
+
+Supabase-backed public detail routes are available without creating per-event or per-media TSX files:
+
+- `/events/[slug]` renders published event records through the catalog service.
+- `/media/[slug]` renders published media records through the content service.
+
+Admin preview links for Event CMS and Media CMS now point to these slug routes.
+
 ## Original Files
 
 The original source files are intentionally kept in place:
