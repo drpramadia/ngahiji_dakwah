@@ -1,10 +1,13 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 
 export default function AdminLoginForm() {
-  const [email, setEmail] = useState('');
+  const router = useRouter();
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -16,10 +19,9 @@ export default function AdminLoginForm() {
     setError(null);
 
     const supabase = createSupabaseBrowserClient();
-    const redirectTo = `${window.location.origin}/auth/callback?next=/admin`;
-    const { error: authError } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: redirectTo }
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email: identifier.trim(),
+      password
     });
 
     setPending(false);
@@ -27,17 +29,21 @@ export default function AdminLoginForm() {
       setError(authError.message);
       return;
     }
-    setStatus('Link login admin sudah diminta. Cek email yang terdaftar di Supabase Auth.');
+    setStatus('Login berhasil. Membuka dashboard admin...');
+    router.refresh();
+    router.push('/admin');
   }
 
   return (
     <form className="admin-login-form" onSubmit={handleSubmit}>
-      <label htmlFor="adminEmail">Email admin</label>
-      <input id="adminEmail" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" placeholder="admin@ngahiji.id" />
-      <button className="btn" type="submit" disabled={pending}>{pending ? 'Mengirim...' : 'Kirim link login'}</button>
+      <label htmlFor="adminIdentifier">Email / username admin</label>
+      <input id="adminIdentifier" type="email" value={identifier} onChange={(event) => setIdentifier(event.target.value)} required autoComplete="username" placeholder="admin@ngahiji.id" />
+      <label htmlFor="adminPassword">Password</label>
+      <input id="adminPassword" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required autoComplete="current-password" />
+      <button className="btn" type="submit" disabled={pending}>{pending ? 'Memeriksa...' : 'Login ke CMS'}</button>
       {status && <p className="admin-status">{status}</p>}
       {error && <p className="admin-error" role="alert">{error}</p>}
-      <p className="notice">Akses admin tetap diperiksa server-side melalui Supabase Auth dan RBAC. Email login saja tidak memberi izin admin.</p>
+      <p className="notice">Gunakan akun admin yang dibuat di Supabase Auth. Login berhasil tetap harus lolos RBAC server-side di `organizer_members`.</p>
     </form>
   );
 }

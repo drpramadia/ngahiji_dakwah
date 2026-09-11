@@ -12,7 +12,7 @@ export default function AdminLoginPage() {
         <Link className="pageback" href="/">← Kembali ke website</Link>
         <div className="eyebrow">NGAHIJI CMS</div>
         <h1>Admin login.</h1>
-        <p>Masuk dengan Supabase Auth. Setelah login, akses tetap membutuhkan role admin di database.</p>
+        <p>Masuk dengan email/username dan password dari Supabase Auth. Setelah login, akses tetap membutuhkan role admin di database.</p>
         <AdminLoginForm />
       </section>
     </main>

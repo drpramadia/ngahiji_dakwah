@@ -1,12 +1,12 @@
 # Admin Bootstrap
 
-Supabase Auth login is active through `/admin/login`, but access to `/admin` requires a row in `public.organizer_members`.
+Supabase Auth email/password login is active through `/admin/login`, but access to `/admin` requires a row in `public.organizer_members`.
 
 Do not paste service-role keys into chat. Run bootstrap SQL only from a trusted local terminal, Supabase SQL editor, or approved server-side admin tooling.
 
 ## Steps
 
-1. Create or invite the admin user through Supabase Auth.
+1. Create the admin user through Supabase Auth with email and password. The email is used as the CMS username.
 2. Copy the user's UUID from Supabase Auth users.
 3. Ensure the organizer row exists. The initial seed creates:
 
@@ -40,5 +40,6 @@ on conflict (organizer_id, user_id) do update set role = excluded.role;
 
 - `/admin` checks Supabase Auth server-side.
 - `/admin` checks `organizer_members` server-side.
+- A valid email/password login without an admin role still cannot access CMS content.
 - Users without a role are redirected to `/admin/unauthorized`.
 - Public UI is not changed by admin setup.
