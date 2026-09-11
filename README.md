@@ -203,6 +203,40 @@ Asset metadata is tracked in `public.media_assets`. URL resolution is centralize
 
 No local files have been deleted or uploaded to Storage yet. Existing images remain preserved until a dedicated asset migration step moves them safely.
 
+## Ticketing Foundation
+
+`supabase/migrations/20260911000700_ticketing_foundation.sql` creates the production foundation for:
+
+- `registrations`
+- `attendees`
+- `orders`
+- `order_items`
+- `payment_transactions`
+- `tickets`
+- `check_ins`
+- `consents`
+
+Admin read-only routes now exist for:
+
+- `/admin/orders`
+- `/admin/attendees`
+- `/admin/tickets`
+- `/admin/check-in`
+
+These pages read real Supabase tables and show empty states when no records exist. They do not create fake orders, fake payments, fake tickets, fake QR tokens, or fake check-ins.
+
+Ticket activation is guarded in the database and mirrored in `src/lib/ticketing/state.ts`: tickets can only become `ACTIVE` after payment is `PAID` and attendee verification is `VERIFIED`.
+
+Not active yet:
+
+- public registration writes
+- payment provider checkout
+- webhook verification
+- official ticket issuance UI
+- raw QR token generation/delivery
+- scanner endpoint
+- wallet/download actions
+
 ## Original Files
 
 The original source files are intentionally kept in place:

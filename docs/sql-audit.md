@@ -6,9 +6,10 @@ RBAC role migration: `supabase/migrations/20260911000300_rbac_roles.sql`.
 SUPER_ADMIN helper migration: `supabase/migrations/20260911000400_super_admin_role.sql`.
 Content CMS policy migration: `supabase/migrations/20260911000500_content_super_admin_policies.sql`.
 Storage asset foundation migration: `supabase/migrations/20260911000600_storage_asset_foundation.sql`.
+Ticketing foundation migration: `supabase/migrations/20260911000700_ticketing_foundation.sql`.
 Initial production content seed: `supabase/seed/initial_content.sql`.
 
-The foundation, content, RBAC role, SUPER_ADMIN helper, content CMS policy, and storage asset foundation migrations were applied to the linked Supabase project on 2026-09-11 after dry-runs. No reset, table drop, or destructive migration was run.
+The foundation, content, RBAC role, SUPER_ADMIN helper, content CMS policy, storage asset foundation, and ticketing foundation migrations were applied to the linked Supabase project on 2026-09-11 after dry-runs. No reset, table drop, or destructive migration was run.
 
 The initial production content seed was applied idempotently with `insert ... on conflict do update`. No deletes were run.
 
@@ -44,6 +45,9 @@ Resolution:
 - `media_staff_write` and `community_staff_write` now allow `SUPER_ADMIN`, `ADMIN`, and `EDITOR`.
 - Supabase Storage buckets exist for public, event, media, sponsor, and speaker assets.
 - `media_assets` stores production asset metadata and is public-readable only when `status = 'PUBLISHED'`.
+- Ticketing foundation tables exist for registrations, attendees, orders, order items, payment transactions, tickets, check-ins, and consents.
+- `tickets` cannot become `ACTIVE` unless payment is `PAID` and verification is `VERIFIED`.
+- `check_ins` uses a database trigger with row locking to prevent duplicate valid check-ins.
 
 ## Weaknesses / Follow-Up Before Staging
 
@@ -54,4 +58,4 @@ Resolution:
 - `profiles` does not yet update `updated_at` automatically. Add a profile trigger before profile editing is shipped.
 - Audit logging records catalog writes, but there is no authorized server read path for admins yet.
 - Status transition rules are minimal. A formal workflow table or transition function will be needed before editorial review is operated by multiple roles.
-- No policies or schema exist yet for orders, attendees, payments, official tickets, QR verification, check-in, email, WhatsApp, sponsors, live content, advanced media assets/storage, or analytics.
+- Payment provider credentials, webhook verification, raw QR token issuance, email/WhatsApp delivery, sponsors, live content, advanced media assets/storage, and analytics are not active yet.
