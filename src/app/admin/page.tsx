@@ -8,8 +8,9 @@ export const metadata = {
 };
 
 const adminSections = [
-  ['Events', '/admin/events', 'Kelola event, status publish, dan konten detail.'],
+    ['Events', '/admin/events', 'Kelola event, status publish, dan konten detail.'],
   ['Tickets', '/admin/tickets', 'Kelola ticket types dan kuota.'],
+  ['Payments', '/admin/payments', 'Verifikasi pembayaran QRIS manual (approve/reject).'],
   ['Orders', '/admin/orders', 'Belum aktif sampai order schema tersedia.'],
   ['Attendees', '/admin/attendees', 'Belum aktif sampai registration schema tersedia.'],
   ['Check-in', '/admin/check-in', 'Belum aktif sampai ticket QR schema tersedia.'],

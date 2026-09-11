@@ -132,7 +132,28 @@ function RegistrationModal({ event, quantity, setQuantity, onSubmit }: { event: 
 function PaymentModal({ event, names, onConfirm }: { event: CatalogEvent; names: string[]; onConfirm: () => void }) {
   const ticket = lowestTicket(event);
   const total = (ticket?.price_idr ?? 0) * names.length;
-  return <><div className="eyebrow">Payment gateway / Simulasi</div><h2>Order summary.</h2><p>{event.title}</p><div className="ticket"><div className="orderline"><span>{names.length} × {ticket?.name ?? 'Registration'}</span><strong>{money(total)}</strong></div><div className="orderline"><span>Biaya layanan</span><strong>Rp0</strong></div><div className="orderline total"><span>Total</span><strong>{money(total)}</strong></div></div><p className="notice">Payment gateway belum terhubung. Tombol ini hanya membuka pratinjau tiket dan QR simulasi, tidak menagih uang dan tidak menandai order sebagai paid di database.</p><button className="btn lime" onClick={onConfirm}>Lihat tiket & QR simulasi ↗</button></>;
+  return (
+    <>
+      <div className="eyebrow">Order summary</div>
+      <h2>Order summary.</h2>
+      <p>{event.title}</p>
+      <div className="ticket">
+        <div className="orderline"><span>{names.length} × {ticket?.name ?? 'Registration'}</span><strong>{money(total)}</strong></div>
+        <div className="orderline"><span>Biaya layanan</span><strong>Rp0</strong></div>
+        <div className="orderline total"><span>Total</span><strong>{money(total)}</strong></div>
+      </div>
+      {ticket && (
+        <form action="/api/checkout" method="POST">
+          <input type="hidden" name="event_id" value={event.id} />
+          <input type="hidden" name="ticket_type_id" value={ticket.id} />
+          <input type="hidden" name="quantity" value={names.length} />
+          <button className="btn lime" type="submit">Bayar dengan QRIS ↗</button>
+        </form>
+      )}
+      <p className="notice">Anda akan diarahkan ke halaman pembayaran QRIS. Login diperlukan.</p>
+      <button className="btn light" type="button" onClick={onConfirm} style={{ marginTop: 10 }}>Lihat pratinjau tiket (simulasi) ↗</button>
+    </>
+  );
 }
 
 function SimulatedQr({ label }: { label: string }) {
