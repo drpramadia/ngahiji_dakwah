@@ -4,9 +4,11 @@ import { CalendarDays, Home, Newspaper, Play, Search, UserRound, X } from 'lucid
 import { useMemo, useState } from 'react';
 import { ngahijiAssets } from '@/data/assets/ngahiji-assets';
 import PublicAuthPanel from '@/components/PublicAuthPanel';
+import LiveSection from '@/components/LiveSection';
 import { resolveMedia } from '@/lib/assets';
 import type { EventRecord, TicketType } from '@/lib/ngahiji-catalog';
 import type { CommunityRecord, StoryRecord } from '@/lib/ngahiji-content';
+import type { LiveFeed } from '@/lib/youtube/client';
 
 export type CatalogEvent = EventRecord & { tickets: TicketType[] };
 type Modal =
@@ -28,6 +30,7 @@ type Props = {
   stories: StoryRecord[];
   catalogError: string | null;
   contentError: string | null;
+  liveFeed?: LiveFeed | null;
 };
 
 const logoUrl = '/NGAHIJI_LOGO.png';
@@ -63,7 +66,7 @@ function mediaImage(src: string, alt: string) {
   return resolveMedia({ url: src, alt_text: alt });
 }
 
-export default function NgahijiApp({ communities, events, stories, catalogError, contentError }: Props) {
+export default function NgahijiApp({ communities, events, stories, catalogError, contentError, liveFeed }: Props) {
   const [modal, setModal] = useState<Modal>(null);
   const [filter, setFilter] = useState('All');
   const [quantity, setQuantity] = useState(1);
@@ -99,7 +102,7 @@ export default function NgahijiApp({ communities, events, stories, catalogError,
         </section>
         <div className="ticker"><div className="wrap tickerline"><span>COME AS YOU ARE</span><b>✳</b><span>LEARN SOMETHING GOOD</span><b>✳</b><span>MEET YOUR PEOPLE</span><b>✳</b><span>LET'S NGAHIJI</span></div></div>
         <section className="wrap" id="events"><div className="sectionhead"><div><div className="eyebrow">Make time for something good</div><h2>What's happening?<span className="dot" /></h2><p>Jangan sampai ketinggalan event dan kajian terbaru dari Ngahiji.</p></div><button className="smalllink" onClick={() => setModal({ type: 'search' })}>Lihat semua event <span>↗</span></button></div>{catalogError ? <div className="serviceerror"><h3>Catalog service error</h3><p>{catalogError}</p><small>Koneksi katalog sedang tidak tersedia. Coba lagi beberapa saat.</small></div> : <div className="events" aria-label="Event pilihan">{events.map((event) => { const parts = dateParts(event.starts_at); const ticket = lowestTicket(event); const image = mediaImage(event.image_url, `Ilustrasi ${event.category}`); return <button className="event" key={event.id} onClick={() => setModal({ type: 'event', event })}><img src={image.src} alt={image.alt} /><span className="date"><b>{parts.day}</b>{parts.month}<br />2026</span><span className="status">{ticket?.price_idr ? 'REGISTRATION OPEN' : 'FREE REGISTRATION'}</span><div className="eventtext"><span className="eventtag">{event.category}</span><span className="location">⌖ {event.city}</span><h3>{event.title}</h3><p>{event.format}</p><div className="eventfoot"><span>{ticket ? (ticket.price_idr ? 'Mulai dari ' + money(ticket.price_idr) : 'Gratis · Daftar dulu, ya!') : 'Tiket belum tersedia'}</span><span className="roundarrow">↗</span></div></div></button>; })}</div>}<p className="viewlabel">CURATED FOR YOU</p></section>
-        <section className="wrap live" id="live"><div><div className="eyebrow">The good is on air</div><h2>NGAHIJI<br />LIVE.</h2><p>Saksikan kajian, talkshow, dan momen spesial. Di mana pun kamu berada.</p><button className="btn white" onClick={() => setModal({ type: 'live' })}>Tonton sekarang <span>↗</span></button></div><div className="player"><img alt={liveImage.alt} src={liveImage.src} /><span className="livebadge">● LIVE · PREVIEW</span><button className="play" aria-label="Buka pratinjau Ngahiji Live" onClick={() => setModal({ type: 'live' })}>▷</button><div className="caption"><strong>Menjadi Baik, Tanpa Merasa Paling Baik.</strong>Ngahiji Talks · Pratinjau siaran</div></div><div className="schedule"><button onClick={() => setModal({ type: 'live' })}>Ruang untuk bertumbuh <small>LIVE PREVIEW</small></button><button onClick={() => setModal({ type: 'live' })}>Ngobrol tentang pulang <small>Jadwal · 19.00 WIB</small></button><button onClick={() => setModal({ type: 'live' })}>Ngahiji Podcast / 012 <small>Replay · 32 menit</small></button></div></section>
+        <LiveSection initialFeed={liveFeed ?? null} />
         <section className="wrap media" id="media"><div className="sectionhead"><div><div className="eyebrow">A little perspective</div><h2>Stories worth sharing.<span className="dot orange-dot" /></h2><p>Insight baru. Cerita dekat. Bekal untuk perjalananmu.</p></div><button className="smalllink" onClick={() => setModal({ type: 'search' })}>Explore media ↗</button></div>{contentError ? <div className="serviceerror"><h3>Content service error</h3><p>{contentError}</p><small>Konten media sedang tidak tersedia. Coba lagi beberapa saat.</small></div> : <><div className="filters" role="group" aria-label="Kategori media">{['All', 'Kajian', 'Lifestyle', 'Youth', 'Family', 'Community'].map((name) => <button key={name} className={filter === name ? 'filter selected' : 'filter'} aria-pressed={filter === name} onClick={() => setFilter(name)}>{name === 'All' ? 'Semua' : name}</button>)}</div><div className="mediagrid">{visibleStories.map((story) => { const image = mediaImage(story.image_url, `Ilustrasi ${story.category}`); return <button className="story" key={story.slug} onClick={() => setModal({ type: 'story', story })}><div className="storyimage"><img src={image.src} alt={image.alt} /><span className="pill">{story.category}</span></div><span className="storymeta">{displayDate(story.published_at)} / {story.reading_time}</span><h3>{story.title}</h3><p>{story.format.replace('_', ' ')} ↗</p></button>; })}</div></>}</section>
         <section className="wrap community" id="community"><div><div className="eyebrow">You belong here</div><h2>Find your people.<span className="dot blue-dot" /></h2><p>Bertemu yang satu frekuensi. Bertumbuh dengan cara kamu sendiri.</p></div><div className="communitylist">{communities.map((community) => <button className="communityitem" key={community.slug} onClick={() => setModal({ type: 'community', community })}><span className="communityicon" style={{ background: community.color }}>{community.mark}</span>{community.name}</button>)}</div></section>
         <section className="wrap moments" id="moments"><div className="sectionhead"><div><div className="eyebrow">Real people. Real connections.</div><h2>Ngahiji moment.</h2><p>Bukan sekadar datang. Tapi jadi bagian.</p></div><span className="script">Small moments,<br />big meaning. ↙</span></div><div className="momentgrid"><div className="moment"><img alt={momentImages[0].alt} src={momentImages[0].src} /><span>Good company ☺</span></div><div className="moment"><img alt={momentImages[1].alt} src={momentImages[1].src} /><span>A table for everyone.</span></div><div className="moment"><img alt={momentImages[2].alt} src={momentImages[2].src} /><span>More than an event ↗</span></div><div className="moment quote"><b>“Datang untuk acaranya.<br />Pulang dengan rasa keluarga.”</b><small>THE FEELING WE WANT TO CREATE.<br /><br />Let's Ngahiji.</small></div></div></section>

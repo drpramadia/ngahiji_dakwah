@@ -2,6 +2,9 @@ import { getCatalogService } from '@/lib/catalog-runtime';
 import { getPublicContentService } from '@/lib/content-runtime';
 import NgahijiApp, { type CatalogEvent } from '@/components/NgahijiApp';
 import type { CommunityRecord, StoryRecord } from '@/lib/ngahiji-content';
+import { getLiveFeed, type LiveFeed } from '@/lib/youtube/client';
+
+export const revalidate = 600;
 
 export default async function Home() {
   let events: CatalogEvent[] = [];
@@ -21,11 +24,18 @@ export default async function Home() {
     catalogError = error instanceof Error ? error.message : 'Catalog service failed';
   }
 
-  try {
+    try {
     const content = getPublicContentService();
     [stories, communities] = await Promise.all([content.getStories(), content.getCommunities()]);
   } catch (error) {
     contentError = error instanceof Error ? error.message : 'Content service failed';
+  }
+
+  let liveFeed: LiveFeed | null = null;
+  try {
+    liveFeed = await getLiveFeed();
+  } catch {
+    liveFeed = null;
   }
 
   return (
@@ -35,6 +45,7 @@ export default async function Home() {
       stories={stories}
       catalogError={catalogError}
       contentError={contentError}
+      liveFeed={liveFeed}
     />
   );
 }

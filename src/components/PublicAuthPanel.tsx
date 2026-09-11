@@ -6,19 +6,23 @@ import { getAuthRedirectUrl } from '@/lib/app-url';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 
 type AuthMode = 'login' | 'join';
-type AuthMethod = 'google' | 'email' | 'phone' | 'account';
+type AuthMethod = 'google' | 'email' | 'phone' | 'account' | 'password';
 
 type Props = {
   mode: AuthMode;
 };
 
+const GOOGLE_ENABLED = process.env.NEXT_PUBLIC_AUTH_GOOGLE_ENABLED === 'true';
+const PHONE_ENABLED = process.env.NEXT_PUBLIC_AUTH_PHONE_ENABLED === 'true';
+
 function redirectToProfile() {
   return getAuthRedirectUrl('/profile', window.location.origin);
 }
 
-export default function PublicAuthPanel({ mode }: Props) {
+export default function PublicAuthPanel({ mode: initialMode }: Props) {
   const router = useRouter();
-  const [method, setMethod] = useState<AuthMethod>(mode === 'join' ? 'account' : 'email');
+  const [mode, setMode] = useState<AuthMode>(initialMode);
+  const [method, setMethod] = useState<AuthMethod>(initialMode === 'join' ? 'account' : 'password');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
@@ -93,7 +97,7 @@ export default function PublicAuthPanel({ mode }: Props) {
     });
   }
 
-  async function createAccount(event: FormEvent<HTMLFormElement>) {
+    async function createAccount(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     await run(async () => {
       const supabase = createSupabaseBrowserClient();
@@ -106,20 +110,57 @@ export default function PublicAuthPanel({ mode }: Props) {
         }
       });
       if (authError) throw authError;
-      setStatus('Akun sudah dibuat di Supabase. Jika konfirmasi email aktif, buka email untuk melanjutkan ke profil Ngahiji.');
+      setStatus('Akun sudah dibuat. Jika konfirmasi email aktif, cek inbox untuk melanjutkan.');
     });
+  }
+
+  async function passwordLogin(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await run(async () => {
+      const supabase = createSupabaseBrowserClient();
+      const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+      if (authError) throw authError;
+      router.refresh();
+      router.push('/profile');
+    });
+  }
+
+    const loginMethods: { key: AuthMethod; label: string; show: boolean }[] = [
+    { key: 'password', label: 'Password', show: true },
+    { key: 'email', label: 'Magic Link', show: true },
+    { key: 'google', label: 'Google', show: GOOGLE_ENABLED },
+    { key: 'phone', label: 'WhatsApp', show: PHONE_ENABLED }
+  ];
+  const joinMethods: { key: AuthMethod; label: string; show: boolean }[] = [
+    { key: 'account', label: 'Email + Password', show: true },
+    { key: 'email', label: 'Magic Link', show: true },
+    { key: 'google', label: 'Google', show: GOOGLE_ENABLED },
+    { key: 'phone', label: 'WhatsApp', show: PHONE_ENABLED }
+  ];
+  const activeMethods = mode === 'login' ? loginMethods : joinMethods;
+
+  function switchMode(next: AuthMode) {
+    setMode(next);
+    setMethod(next === 'join' ? 'account' : 'password');
+    setStatus(null);
+    setError(null);
   }
 
   return (
     <div className="public-auth-panel">
+      <div className="auth-mode-toggle" role="tablist" aria-label="Login atau daftar">
+        <button type="button" className={mode === 'login' ? 'selected' : ''} onClick={() => switchMode('login')}>Masuk</button>
+        <button type="button" className={mode === 'join' ? 'selected' : ''} onClick={() => switchMode('join')}>Daftar</button>
+      </div>
       <div className="auth-methods" role="tablist" aria-label="Metode autentikasi Ngahiji">
-        <button type="button" className={method === 'google' ? 'selected' : ''} onClick={() => setMethod('google')}>Google</button>
-        <button type="button" className={method === 'email' ? 'selected' : ''} onClick={() => setMethod('email')}>Email</button>
-        <button type="button" className={method === 'phone' ? 'selected' : ''} onClick={() => setMethod('phone')}>WhatsApp OTP</button>
-        <button type="button" className={method === 'account' ? 'selected' : ''} onClick={() => setMethod('account')}>Buat akun</button>
+        {activeMethods.filter((m) => m.show).map((m) => (
+          <button key={m.key} type="button" className={method === m.key ? 'selected' : ''} onClick={() => setMethod(m.key)}>{m.label}</button>
+        ))}
       </div>
 
-      {method === 'google' && <div className="admin-login-form"><button className="btn" type="button" onClick={googleAuth} disabled={pending}>{pending ? 'Menghubungkan...' : 'Lanjut dengan Google'}</button><p className="notice">Google OAuth harus aktif di konfigurasi Supabase Auth.</p></div>}
+      {method === 'password' && <form className="admin-login-form" onSubmit={passwordLogin}><label htmlFor="loginEmail">Email</label><input id="loginEmail" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" placeholder="hello@you.com" /><label htmlFor="loginPassword">Password</label><input id="loginPassword" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required minLength={8} autoComplete="current-password" /><button className="btn" type="submit" disabled={pending}>{pending ? 'Memeriksa...' : 'Masuk'}</button></form>}
+
+      {method === 'google' && GOOGLE_ENABLED && <div className="admin-login-form"><button className="btn" type="button" onClick={googleAuth} disabled={pending}>{pending ? 'Menghubungkan...' : 'Lanjut dengan Google'}</button><p className="notice">Google OAuth harus aktif di konfigurasi Supabase Auth.</p></div>}
 
       {method === 'email' && <form className="admin-login-form" onSubmit={emailMagic}><label htmlFor="authEmail">Email</label><input id="authEmail" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" placeholder="hello@you.com" /><button className="btn" type="submit" disabled={pending}>{pending ? 'Mengirim...' : mode === 'join' ? 'Kirim link bergabung' : 'Kirim link masuk'}</button></form>}
 

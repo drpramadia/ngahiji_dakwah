@@ -1,4 +1,5 @@
 import type { CmsEvent } from '@/lib/admin/events';
+import MediaUploader from '@/components/admin/MediaUploader';
 import { createEventAction, updateEventAction } from './actions';
 
 function dateTimeLocal(value?: string) {
@@ -25,9 +26,9 @@ export default function EventForm({ event }: { event?: CmsEvent }) {
         <label>Ends at<input name="ends_at" type="datetime-local" required defaultValue={dateTimeLocal(event?.ends_at)} /></label>
         <label>Timezone<input name="timezone" required defaultValue={event?.timezone ?? 'Asia/Jakarta'} /></label>
         <label>City<input name="city" required defaultValue={event?.city ?? ''} /></label>
-        <label>Venue<input name="venue" defaultValue={event?.venue ?? ''} /></label>
-        <label>Hero image URL<input name="image_url" type="url" required defaultValue={event?.image_url ?? ''} /></label>
+                <label>Venue<input name="venue" defaultValue={event?.venue ?? ''} /></label>
       </div>
+      <MediaUploader name="image_url" bucket="event-assets" folder="hero" label="Hero image" required defaultValue={event?.image_url ?? ''} />
       <label>Description<textarea name="description" rows={5} defaultValue={event?.description ?? ''} /></label>
       <label>Format<input name="format" required defaultValue={event?.format ?? ''} /></label>
       <fieldset className="admin-fieldset">
