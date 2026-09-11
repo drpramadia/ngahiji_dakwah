@@ -87,35 +87,52 @@ export type LiveFeed = {
 };
 
 /**
- * Get combined live + recent feed for a search query.
- * Priority: currently live > upcoming > most recent uploads.
+ * Interleave arrays round-robin so each query gets fair representation.
+ */
+function interleave<T>(lists: T[][]): T[] {
+  const out: T[] = [];
+  const max = Math.max(0, ...lists.map((l) => l.length));
+  for (let i = 0; i < max; i++) {
+    for (const list of lists) if (list[i] !== undefined) out.push(list[i]);
+  }
+  return out;
+}
+
+/**
+ * Get combined feed. Prioritizes recent uploads (existing videos).
+ * Live streams are added as bonus if any are active.
+ * Supports multiple queries via YOUTUBE_SEARCH_QUERIES (comma-separated) or falls back to YOUTUBE_SEARCH_QUERY.
  */
 export async function getLiveFeed(query?: string): Promise<LiveFeed> {
-  const q = (query || process.env.YOUTUBE_SEARCH_QUERY || 'ust hanan attaki dakwah').trim();
+  const queries = query
+    ? [query]
+    : (process.env.YOUTUBE_SEARCH_QUERIES?.split(',').map((s) => s.trim()).filter(Boolean)
+        ?? [process.env.YOUTUBE_SEARCH_QUERY || 'ust hanan attaki dakwah']);
 
-  const [live, upcoming, recent] = await Promise.all([
-    searchVideos({ q, eventType: 'live', maxResults: '4' }).catch(() => []),
-    searchVideos({ q, eventType: 'upcoming', maxResults: '4' }).catch(() => []),
-    searchVideos({ q, order: 'date', maxResults: '8' }).catch(() => [])
-  ]);
+  const recentPerQuery = await Promise.all(
+    queries.map((q) => searchVideos({ q, order: 'date', maxResults: '4' }).catch(() => []))
+  );
+  const livePerQuery = await Promise.all(
+    queries.map((q) => searchVideos({ q, eventType: 'live', maxResults: '2' }).catch(() => []))
+  );
+
+  const recent = interleave(recentPerQuery);
+  const live = interleave(livePerQuery);
 
   let featured: YouTubeVideo | null = null;
   let source: LiveFeed['source'] = 'recent';
 
-  if (live.length > 0) {
-    featured = live[0];
-    source = 'live';
-  } else if (upcoming.length > 0) {
-    featured = upcoming[0];
-    source = 'upcoming';
-  } else if (recent.length > 0) {
+  if (recent.length > 0) {
     featured = recent[0];
     source = 'recent';
+  } else if (live.length > 0) {
+    featured = live[0];
+    source = 'live';
   }
 
   const seen = new Set<string>();
   if (featured) seen.add(featured.videoId);
-  const pool = [...live, ...upcoming, ...recent];
+  const pool = [...recent, ...live];
   const sidebar: YouTubeVideo[] = [];
   for (const v of pool) {
     if (seen.has(v.videoId)) continue;
@@ -124,5 +141,5 @@ export async function getLiveFeed(query?: string): Promise<LiveFeed> {
     if (sidebar.length >= 3) break;
   }
 
-  return { featured, sidebar, source, query: q };
+  return { featured, sidebar, source, query: queries.join(' | ') };
 }
