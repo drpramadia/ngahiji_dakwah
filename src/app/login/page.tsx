@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import PublicAuthForm from './PublicAuthForm';
+import PublicAuthPanel from '@/components/PublicAuthPanel';
 
 export const metadata = { title: 'Masuk - Ngahiji' };
 
@@ -11,7 +11,7 @@ export default function LoginPage() {
         <div className="eyebrow">MY NGAHIJI</div>
         <h1>Masuk.</h1>
         <p>Lanjutkan perjalananmu bersama Ngahiji dengan akun yang terhubung ke Supabase Auth.</p>
-        <PublicAuthForm mode="login" />
+        <PublicAuthPanel mode="login" />
       </section>
     </main>
   );

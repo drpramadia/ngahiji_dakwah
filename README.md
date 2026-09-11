@@ -36,7 +36,7 @@ Working now:
 
 - Next.js App Router + TypeScript app shell.
 - Public Ngahiji homepage sections from the prototype: hero, events, live, media, community, moments, organizer CTA, closing, footer, and mobile dock.
-- Public `Masuk`, `Join Ngahiji`, and mobile `Profile` entry points are active through Supabase Auth and `/profile`.
+- Public `Masuk`, `Join Ngahiji`, and mobile `Profile` entry points open a Supabase Auth popup with Google, email Magic Link, phone/WhatsApp OTP, and direct account creation options.
 - Event cards loaded through the catalog service boundary.
 - Event detail modal.
 - Multi-participant ticket simulation flow with payment gateway simulation and ticket/QR preview.
@@ -270,6 +270,8 @@ Current status:
 - no production checkout activation without Midtrans/Xendit configuration
 
 Public ticket/payment UI remains explicitly marked as simulation until provider configuration, server-side payment verification, official ticket issuance, and QR validation are implemented.
+
+Google OAuth and phone/WhatsApp OTP require matching providers to be enabled in Supabase Auth. Direct account creation stores users in Supabase Auth and sends them to `/profile` after verification/session creation.
 
 ## Original Files
 
