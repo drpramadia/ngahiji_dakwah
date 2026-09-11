@@ -2,9 +2,10 @@ import { getCatalogService } from '@/lib/catalog-runtime';
 import { getPublicContentService } from '@/lib/content-runtime';
 import NgahijiApp, { type CatalogEvent } from '@/components/NgahijiApp';
 import type { CommunityRecord, StoryRecord } from '@/lib/ngahiji-content';
-import { getLiveFeed, type LiveFeed } from '@/lib/youtube/client';
+import { getLiveStreamFeed } from '@/lib/live-streams/service';
+import type { LiveStreamFeed } from '@/lib/live-streams/types';
 
-export const revalidate = 600;
+export const revalidate = 300;
 
 export default async function Home() {
   let events: CatalogEvent[] = [];
@@ -31,9 +32,9 @@ export default async function Home() {
     contentError = error instanceof Error ? error.message : 'Content service failed';
   }
 
-  let liveFeed: LiveFeed | null = null;
+    let liveFeed: LiveStreamFeed | null = null;
   try {
-    liveFeed = await getLiveFeed();
+    liveFeed = await getLiveStreamFeed();
   } catch {
     liveFeed = null;
   }

@@ -8,7 +8,7 @@ import LiveSection from '@/components/LiveSection';
 import { resolveMedia } from '@/lib/assets';
 import type { EventRecord, TicketType } from '@/lib/ngahiji-catalog';
 import type { CommunityRecord, StoryRecord } from '@/lib/ngahiji-content';
-import type { LiveFeed } from '@/lib/youtube/client';
+import type { LiveStreamFeed } from '@/lib/live-streams/types';
 
 export type CatalogEvent = EventRecord & { tickets: TicketType[] };
 type Modal =
@@ -30,7 +30,7 @@ type Props = {
   stories: StoryRecord[];
   catalogError: string | null;
   contentError: string | null;
-  liveFeed?: LiveFeed | null;
+  liveFeed?: LiveStreamFeed | null;
 };
 
 const logoUrl = '/NGAHIJI_LOGO.png';
