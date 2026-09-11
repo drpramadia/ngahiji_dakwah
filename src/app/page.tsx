@@ -1,10 +1,14 @@
-import { demoCommunities, demoStories } from '@/data/demo/catalog';
 import { getCatalogService, isDemoMode } from '@/lib/catalog-runtime';
+import { getPublicContentService } from '@/lib/content-runtime';
 import NgahijiApp, { type CatalogEvent } from '@/components/NgahijiApp';
+import type { CommunityRecord, StoryRecord } from '@/lib/ngahiji-content';
 
 export default async function Home() {
   let events: CatalogEvent[] = [];
   let catalogError: string | null = null;
+  let stories: StoryRecord[] = [];
+  let communities: CommunityRecord[] = [];
+  let contentError: string | null = null;
 
   try {
     const catalog = getCatalogService();
@@ -17,13 +21,21 @@ export default async function Home() {
     catalogError = error instanceof Error ? error.message : 'Catalog service failed';
   }
 
+  try {
+    const content = getPublicContentService();
+    [stories, communities] = await Promise.all([content.getStories(), content.getCommunities()]);
+  } catch (error) {
+    contentError = error instanceof Error ? error.message : 'Content service failed';
+  }
+
   return (
     <NgahijiApp
-      communities={demoCommunities}
+      communities={communities}
       demoMode={isDemoMode()}
       events={events}
-      stories={demoStories}
+      stories={stories}
       catalogError={catalogError}
+      contentError={contentError}
     />
   );
 }

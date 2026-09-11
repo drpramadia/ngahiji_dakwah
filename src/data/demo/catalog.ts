@@ -1,4 +1,5 @@
 import type { EventRecord, TicketType } from '@/lib/ngahiji-catalog';
+import type { CommunityRecord, StoryRecord } from '@/lib/ngahiji-content';
 
 const organizerId = '11111111-1111-4111-8111-111111111111';
 
@@ -63,18 +64,18 @@ export const demoTicketTypes: TicketType[] = [
   { id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb4', event_id: demoEvents[2].id, name: 'Regular', currency: 'IDR', price_idr: 100000, quota: 180, active: true }
 ];
 
-export const demoStories = [
-  { title: 'Kenapa Anak Muda Butuh Ruang untuk Bertumbuh Bersama?', category: 'Kajian', format: 'ARTICLE', date: '10 Sep 2026', time: '5 menit baca', image: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=700&auto=format&fit=crop&q=80', text: 'Bertumbuh tidak selalu berarti punya semua jawaban. Kadang, langkah pertamanya adalah menemukan ruang aman untuk bertanya.' },
-  { title: 'Ngahiji: Lebih dari Sekadar Event, Tapi Gerakan Bersama', category: 'Community', format: 'VIDEO', date: '8 Sep 2026', time: '4 menit', image: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=700&auto=format&fit=crop&q=80', text: 'Sebuah acara selesai ketika lampu panggung padam. Tapi pertemuan yang bermakna bisa menjadi awal perjalanan baru.' },
-  { title: 'Menemukan Ketenangan dalam Kesibukan', category: 'Lifestyle', format: 'PODCAST', date: '5 Sep 2026', time: '32 menit', image: 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=700&auto=format&fit=crop&q=80', text: 'Tidak setiap jeda perlu diisi. Memberi ruang untuk refleksi membantu kita kembali hadir.' },
-  { title: 'Mulai dari Hal Kecil, Berdampak Bersama', category: 'Youth', format: 'SHORT STORY', date: '3 Sep 2026', time: '3 menit baca', image: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=700&auto=format&fit=crop&q=80', text: 'Kebaikan tidak harus menunggu rencana besar. Langkah kecil bisa dimulai hari ini.' }
+export const demoStories: StoryRecord[] = [
+  { slug: 'ruang-bertumbuh-anak-muda', title: 'Kenapa Anak Muda Butuh Ruang untuk Bertumbuh Bersama?', category: 'Kajian', format: 'ARTICLE', published_at: '2026-09-10T02:00:00.000Z', reading_time: '5 menit baca', image_url: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=700&auto=format&fit=crop&q=80', excerpt: 'Bertumbuh tidak selalu berarti punya semua jawaban.', body: 'Bertumbuh tidak selalu berarti punya semua jawaban. Kadang, langkah pertamanya adalah menemukan ruang aman untuk bertanya.', status: 'PUBLISHED' },
+  { slug: 'ngahiji-gerakan-bersama', title: 'Ngahiji: Lebih dari Sekadar Event, Tapi Gerakan Bersama', category: 'Community', format: 'VIDEO', published_at: '2026-09-08T02:00:00.000Z', reading_time: '4 menit', image_url: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=700&auto=format&fit=crop&q=80', excerpt: 'Pertemuan yang bermakna bisa menjadi awal perjalanan baru.', body: 'Sebuah acara selesai ketika lampu panggung padam. Tapi pertemuan yang bermakna bisa menjadi awal perjalanan baru.', status: 'PUBLISHED' },
+  { slug: 'ketenangan-dalam-kesibukan', title: 'Menemukan Ketenangan dalam Kesibukan', category: 'Lifestyle', format: 'PODCAST', published_at: '2026-09-05T02:00:00.000Z', reading_time: '32 menit', image_url: 'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=700&auto=format&fit=crop&q=80', excerpt: 'Memberi ruang untuk refleksi membantu kita kembali hadir.', body: 'Tidak setiap jeda perlu diisi. Memberi ruang untuk refleksi membantu kita kembali hadir.', status: 'PUBLISHED' },
+  { slug: 'hal-kecil-berdampak-bersama', title: 'Mulai dari Hal Kecil, Berdampak Bersama', category: 'Youth', format: 'SHORT_STORY', published_at: '2026-09-03T02:00:00.000Z', reading_time: '3 menit baca', image_url: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=700&auto=format&fit=crop&q=80', excerpt: 'Kebaikan tidak harus menunggu rencana besar.', body: 'Kebaikan tidak harus menunggu rencana besar. Langkah kecil bisa dimulai hari ini.', status: 'PUBLISHED' }
 ];
 
-export const demoCommunities = [
-  { name: 'Youth', mark: '☺', color: '#d5fa47', text: 'Ruang anak muda untuk belajar, berkarya, dan saling mendukung.' },
-  { name: 'Family', mark: '♡', color: '#dcc9f5', text: 'Cerita parenting, waktu bersama, dan pertemanan antar keluarga.' },
-  { name: 'Entrepreneur', mark: '↗', color: '#ff926c', text: 'Bangun usaha yang bertumbuh bersama nilai dan manfaat.' },
-  { name: 'Creative', mark: '✳', color: '#bdd5ff', text: 'Pertemuan ide, desain, seni, dan ekspresi yang bermakna.' },
-  { name: 'Volunteer', mark: '❋', color: '#f5c7dc', text: 'Ubah kepedulian menjadi aksi kecil yang nyata.' },
-  { name: 'Education', mark: '⌂', color: '#d5fa47', text: 'Belajar sepanjang perjalanan, berbagi sepanjang kesempatan.' }
+export const demoCommunities: CommunityRecord[] = [
+  { slug: 'youth', name: 'Youth', mark: '☺', color: '#d5fa47', description: 'Ruang anak muda untuk belajar, berkarya, dan saling mendukung.', status: 'PUBLISHED' },
+  { slug: 'family', name: 'Family', mark: '♡', color: '#dcc9f5', description: 'Cerita parenting, waktu bersama, dan pertemanan antar keluarga.', status: 'PUBLISHED' },
+  { slug: 'entrepreneur', name: 'Entrepreneur', mark: '↗', color: '#ff926c', description: 'Bangun usaha yang bertumbuh bersama nilai dan manfaat.', status: 'PUBLISHED' },
+  { slug: 'creative', name: 'Creative', mark: '✳', color: '#bdd5ff', description: 'Pertemuan ide, desain, seni, dan ekspresi yang bermakna.', status: 'PUBLISHED' },
+  { slug: 'volunteer', name: 'Volunteer', mark: '❋', color: '#f5c7dc', description: 'Ubah kepedulian menjadi aksi kecil yang nyata.', status: 'PUBLISHED' },
+  { slug: 'education', name: 'Education', mark: '⌂', color: '#d5fa47', description: 'Belajar sepanjang perjalanan, berbagi sepanjang kesempatan.', status: 'PUBLISHED' }
 ];
