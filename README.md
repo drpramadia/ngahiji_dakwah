@@ -203,6 +203,24 @@ Asset metadata is tracked in `public.media_assets`. URL resolution is centralize
 
 No local files have been deleted or uploaded to Storage yet. Existing images remain preserved until a dedicated asset migration step moves them safely.
 
+## Image Content Replacement
+
+Generic lifestyle/concert/dinner imagery has been replaced with individually addressable Islamic/dakwah/community themed local assets under `public/assets/ngahiji/`.
+
+Asset groups:
+
+- `hero/`
+- `events/`
+- `live/`
+- `media/`
+- `community/`
+
+Image metadata lives in `src/data/assets/ngahiji-assets.ts`, and CMS metadata is seeded through `supabase/seed/image_assets.sql` into `public.media_assets`. Event and media records now point to local asset paths in their `image_url` fields.
+
+The UI consumes image references through the existing asset resolver (`resolveMedia()` / `getAssetUrl()`), so future Supabase Storage or CMS-selected replacements do not require changing component layout.
+
+See `docs/image-asset-inventory.md` for the image inventory and mapping.
+
 ## Ticketing Foundation
 
 `supabase/migrations/20260911000700_ticketing_foundation.sql` creates the production foundation for:

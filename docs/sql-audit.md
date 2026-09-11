@@ -7,11 +7,15 @@ SUPER_ADMIN helper migration: `supabase/migrations/20260911000400_super_admin_ro
 Content CMS policy migration: `supabase/migrations/20260911000500_content_super_admin_policies.sql`.
 Storage asset foundation migration: `supabase/migrations/20260911000600_storage_asset_foundation.sql`.
 Ticketing foundation migration: `supabase/migrations/20260911000700_ticketing_foundation.sql`.
+Media asset metadata migration: `supabase/migrations/20260911000800_media_asset_metadata.sql`.
 Initial production content seed: `supabase/seed/initial_content.sql`.
+Image asset seed: `supabase/seed/image_assets.sql`.
 
-The foundation, content, RBAC role, SUPER_ADMIN helper, content CMS policy, storage asset foundation, and ticketing foundation migrations were applied to the linked Supabase project on 2026-09-11 after dry-runs. No reset, table drop, or destructive migration was run.
+The foundation, content, RBAC role, SUPER_ADMIN helper, content CMS policy, storage asset foundation, ticketing foundation, and media asset metadata migrations were applied to the linked Supabase project on 2026-09-11 after dry-runs. No reset, table drop, or destructive migration was run.
 
 The initial production content seed was applied idempotently with `insert ... on conflict do update`. No deletes were run.
+
+The image asset seed was applied idempotently. It registers local public assets in `media_assets` and updates `events.image_url` / `media_items.image_url` to local `/assets/ngahiji/...` paths. No deletes were run and no Storage object uploads were performed.
 
 ## Catalog 404 Finding
 
@@ -45,6 +49,7 @@ Resolution:
 - `media_staff_write` and `community_staff_write` now allow `SUPER_ADMIN`, `ADMIN`, and `EDITOR`.
 - Supabase Storage buckets exist for public, event, media, sponsor, and speaker assets.
 - `media_assets` stores production asset metadata and is public-readable only when `status = 'PUBLISHED'`.
+- `media_assets` supports `LOCAL_PUBLIC`, `SUPABASE_STORAGE`, and `EXTERNAL` source metadata for CMS-ready image replacement.
 - Ticketing foundation tables exist for registrations, attendees, orders, order items, payment transactions, tickets, check-ins, and consents.
 - `tickets` cannot become `ACTIVE` unless payment is `PAID` and verification is `VERIFIED`.
 - `check_ins` uses a database trigger with row locking to prevent duplicate valid check-ins.

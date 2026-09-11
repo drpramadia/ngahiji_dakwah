@@ -11,7 +11,7 @@ function validForm(overrides: Record<string, string> = {}) {
     category: 'Kajian',
     excerpt: 'Short public excerpt.',
     body: 'Longer content body.',
-    image_url: 'https://images.unsplash.com/photo-1?w=700',
+    image_url: '/assets/ngahiji/media/story-quran-study.svg',
     reading_time: '5 menit baca',
     published_at: '2026-09-11T10:00',
     ...overrides

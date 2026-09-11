@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getCatalogService } from '@/lib/catalog-runtime';
+import { resolveMedia } from '@/lib/assets';
 
 function money(value: number) {
   return value ? 'Rp' + new Intl.NumberFormat('id-ID').format(value) : 'Gratis';
@@ -36,13 +37,14 @@ export default async function EventDetailPage({ params }: Props) {
   const event = await catalog.getEventBySlug(slug);
   if (!event) notFound();
   const tickets = await catalog.getTicketTypes(event.id);
+  const image = resolveMedia({ url: event.image_url, alt_text: `Ilustrasi ${event.category}` });
 
   return (
     <main className="public-detail">
       <section className="wrap detail-page">
         <Link className="pageback" href="/#events">← Kembali ke events</Link>
         <div className="detailhero">
-          <img src={event.image_url} alt={`Ilustrasi ${event.category}`} />
+          <img src={image.src} alt={image.alt} />
           <div className="detailherocopy">
             <span className="detailpill">{event.status}</span>
             <h1>{event.title}</h1>

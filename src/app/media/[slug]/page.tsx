@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getPublicContentService } from '@/lib/content-runtime';
+import { resolveMedia } from '@/lib/assets';
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' }).format(new Date(value));
@@ -30,13 +31,14 @@ export default async function MediaDetailPage({ params }: Props) {
   const { slug } = await params;
   const story = await getPublicContentService().getStoryBySlug(slug);
   if (!story) notFound();
+  const image = resolveMedia({ url: story.image_url, alt_text: `Ilustrasi ${story.category}` });
 
   return (
     <main className="public-detail">
       <article className="wrap media-detail-page">
         <Link className="pageback" href="/#media">← Kembali ke media</Link>
         <div className="detailhero media-detail-hero">
-          <img src={story.image_url} alt={`Ilustrasi ${story.category}`} />
+          <img src={image.src} alt={image.alt} />
           <div className="detailherocopy">
             <span className="detailpill">{story.category} · {story.format.replace('_', ' ')}</span>
             <h1>{story.title}</h1>
