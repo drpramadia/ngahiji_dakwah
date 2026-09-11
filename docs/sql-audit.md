@@ -5,9 +5,10 @@ Additional content migration: `supabase/migrations/20260911000200_content_founda
 RBAC role migration: `supabase/migrations/20260911000300_rbac_roles.sql`.
 SUPER_ADMIN helper migration: `supabase/migrations/20260911000400_super_admin_role.sql`.
 Content CMS policy migration: `supabase/migrations/20260911000500_content_super_admin_policies.sql`.
+Storage asset foundation migration: `supabase/migrations/20260911000600_storage_asset_foundation.sql`.
 Initial production content seed: `supabase/seed/initial_content.sql`.
 
-The foundation, content, RBAC role, SUPER_ADMIN helper, and content CMS policy migrations were applied to the linked Supabase project on 2026-09-11 after dry-runs. No reset, table drop, or destructive migration was run.
+The foundation, content, RBAC role, SUPER_ADMIN helper, content CMS policy, and storage asset foundation migrations were applied to the linked Supabase project on 2026-09-11 after dry-runs. No reset, table drop, or destructive migration was run.
 
 The initial production content seed was applied idempotently with `insert ... on conflict do update`. No deletes were run.
 
@@ -41,6 +42,8 @@ Resolution:
 - `organizer_members.role` accepts production CMS roles: `SUPER_ADMIN`, `ADMIN`, `EVENT_MANAGER`, `EDITOR`, `CHECKIN_OPERATOR`, `SPONSOR_MANAGER`, and `ORGANIZER`.
 - `private.has_role()` now treats `SUPER_ADMIN` as an elevated organizer role for existing RLS policies and event publish guards.
 - `media_staff_write` and `community_staff_write` now allow `SUPER_ADMIN`, `ADMIN`, and `EDITOR`.
+- Supabase Storage buckets exist for public, event, media, sponsor, and speaker assets.
+- `media_assets` stores production asset metadata and is public-readable only when `status = 'PUBLISHED'`.
 
 ## Weaknesses / Follow-Up Before Staging
 

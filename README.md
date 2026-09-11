@@ -189,6 +189,20 @@ Supabase-backed public detail routes are available without creating per-event or
 
 Admin preview links for Event CMS and Media CMS now point to these slug routes.
 
+## Storage / Asset Foundation
+
+Supabase Storage buckets are prepared by `supabase/migrations/20260911000600_storage_asset_foundation.sql`:
+
+- `public-assets`
+- `event-assets`
+- `media-assets`
+- `sponsor-assets`
+- `speaker-assets`
+
+Asset metadata is tracked in `public.media_assets`. URL resolution is centralized in `src/lib/assets.ts` through `getAssetUrl()` and `resolveMedia()`.
+
+No local files have been deleted or uploaded to Storage yet. Existing images remain preserved until a dedicated asset migration step moves them safely.
+
 ## Original Files
 
 The original source files are intentionally kept in place:
