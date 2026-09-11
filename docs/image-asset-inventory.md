@@ -18,7 +18,7 @@ The public UI/design is locked. This inventory only tracks image content and dat
 | Event image: Youth Day | `src/data/demo/catalog.ts`, Supabase `events.image_url` | Event cards/detail | Featured Events | card cover, detail hero cover | `public/assets/ngahiji/events/event-youth-kajian.svg` |
 | Event image: Family Gathering | `src/data/demo/catalog.ts`, Supabase `events.image_url` | Event cards/detail | Featured Events | card cover, detail hero cover | `public/assets/ngahiji/events/event-family-learning.svg` |
 | Event image: Entrepreneur Forum | `src/data/demo/catalog.ts`, Supabase `events.image_url` | Event cards/detail | Featured Events | card cover, detail hero cover | `public/assets/ngahiji/events/event-entrepreneur-forum.svg` |
-| Unsplash live stage | `src/components/NgahijiApp.tsx` | `NgahijiApp` | NGAHIJI Live player/modal | 16:9-ish cover | `public/assets/ngahiji/live/live-kajian-stage.svg` |
+| Unsplash live stage | `src/components/NgahijiApp.tsx` | `NgahijiApp` | NGAHIJI Live player/modal | 16:9-ish cover | `public/assets/ngahiji/live/live-kajian-stage.png` |
 | Story image: youth growth | `src/data/demo/catalog.ts`, Supabase `media_items.image_url` | Media cards/detail | Stories | card cover, detail hero cover | `public/assets/ngahiji/media/story-quran-study.svg` |
 | Story image: movement/community | `src/data/demo/catalog.ts`, Supabase `media_items.image_url` | Media cards/detail | Stories | card cover, detail hero cover | `public/assets/ngahiji/media/story-community-discussion.svg` |
 | Story image: calm/lifestyle | `src/data/demo/catalog.ts`, Supabase `media_items.image_url` | Media cards/detail | Stories | card cover, detail hero cover | `public/assets/ngahiji/media/story-family-learning.svg` |
