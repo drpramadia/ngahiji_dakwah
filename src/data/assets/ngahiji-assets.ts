@@ -18,10 +18,10 @@ export type NgahijiAsset = {
 
 export const ngahijiAssets = {
   heroKajian: {
-    id: 'hero-kajian', filename: 'hero-kajian.svg', title: 'Kajian NGAHIJI', description: 'Kajian kontemporer dengan audiens Muslim muda.', category: 'KAJIAN', section: 'HERO', altText: 'Kajian kontemporer dengan pembicara dan audiens Muslim muda', aspectRatio: '4:5', width: 1200, height: 1500, source: 'LOCAL_PUBLIC', status: 'PUBLISHED', publicPath: '/assets/ngahiji/hero/hero-kajian.svg'
+    id: 'hero-kajian', filename: 'hero-kajian.png', title: 'Kajian NGAHIJI', description: 'Kajian kontemporer dengan audiens Muslim muda.', category: 'KAJIAN', section: 'HERO', altText: 'Kajian kontemporer dengan pembicara dan audiens Muslim muda', aspectRatio: '4:5', width: 1200, height: 1500, source: 'LOCAL_PUBLIC', status: 'PUBLISHED', publicPath: '/assets/ngahiji/hero/hero-kajian.png'
   },
   heroCommunity: {
-    id: 'hero-community', filename: 'hero-community.svg', title: 'Komunitas Setelah Kajian', description: 'Anak muda Muslim berinteraksi setelah event.', category: 'COMMUNITY', section: 'HERO', altText: 'Komunitas Muslim muda berinteraksi setelah event', aspectRatio: '5:4', width: 1000, height: 800, source: 'LOCAL_PUBLIC', status: 'PUBLISHED', publicPath: '/assets/ngahiji/hero/hero-community.svg'
+    id: 'hero-community', filename: 'hero-community.png', title: 'Komunitas Setelah Kajian', description: 'Anak muda Muslim berinteraksi setelah event.', category: 'COMMUNITY', section: 'HERO', altText: 'Komunitas Muslim muda berinteraksi setelah event', aspectRatio: '5:4', width: 1000, height: 800, source: 'LOCAL_PUBLIC', status: 'PUBLISHED', publicPath: '/assets/ngahiji/hero/hero-community.png'
   },
   eventYouthKajian: {
     id: 'event-youth-kajian', filename: 'event-youth-kajian.svg', title: 'Youth Kajian Event', description: 'Kajian anak muda Muslim dengan suasana modern.', category: 'KAJIAN', section: 'EVENTS', altText: 'Kajian anak muda Muslim dengan panggung dan audiens', aspectRatio: '4:3', width: 1200, height: 900, source: 'LOCAL_PUBLIC', status: 'PUBLISHED', publicPath: '/assets/ngahiji/events/event-youth-kajian.svg'

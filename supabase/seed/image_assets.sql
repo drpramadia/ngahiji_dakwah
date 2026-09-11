@@ -4,8 +4,8 @@ begin;
 
 insert into public.media_assets (bucket_id, storage_path, filename, mime_type, file_size, width, height, alt_text, title, description, category, section, aspect_ratio, source, public_path, status)
 values
-('public-assets','assets/ngahiji/hero/hero-kajian.svg','hero-kajian.svg','image/svg+xml',null,1200,1500,'Kajian kontemporer dengan pembicara dan audiens Muslim muda','Kajian NGAHIJI','Kajian kontemporer dengan audiens Muslim muda.','KAJIAN','HERO','4:5','LOCAL_PUBLIC','/assets/ngahiji/hero/hero-kajian.svg','PUBLISHED'),
-('public-assets','assets/ngahiji/hero/hero-community.svg','hero-community.svg','image/svg+xml',null,1000,800,'Komunitas Muslim muda berinteraksi setelah event','Komunitas Setelah Kajian','Anak muda Muslim berinteraksi setelah event.','COMMUNITY','HERO','5:4','LOCAL_PUBLIC','/assets/ngahiji/hero/hero-community.svg','PUBLISHED'),
+('public-assets','assets/ngahiji/hero/hero-kajian.png','hero-kajian.png','image/png',null,1200,1500,'Kajian kontemporer dengan pembicara dan audiens Muslim muda','Kajian NGAHIJI','Kajian kontemporer dengan audiens Muslim muda.','KAJIAN','HERO','4:5','LOCAL_PUBLIC','/assets/ngahiji/hero/hero-kajian.png','PUBLISHED'),
+('public-assets','assets/ngahiji/hero/hero-community.png','hero-community.png','image/png',null,1000,800,'Komunitas Muslim muda berinteraksi setelah event','Komunitas Setelah Kajian','Anak muda Muslim berinteraksi setelah event.','COMMUNITY','HERO','5:4','LOCAL_PUBLIC','/assets/ngahiji/hero/hero-community.png','PUBLISHED'),
 ('public-assets','assets/ngahiji/events/event-youth-kajian.svg','event-youth-kajian.svg','image/svg+xml',null,1200,900,'Kajian anak muda Muslim dengan panggung dan audiens','Youth Kajian Event','Kajian anak muda Muslim dengan suasana modern.','KAJIAN','EVENTS','4:3','LOCAL_PUBLIC','/assets/ngahiji/events/event-youth-kajian.svg','PUBLISHED'),
 ('public-assets','assets/ngahiji/events/event-family-learning.svg','event-family-learning.svg','image/svg+xml',null,1200,900,'Acara pembelajaran keluarga Muslim','Family Learning Event','Acara pembelajaran keluarga Muslim yang hangat.','FAMILY','EVENTS','4:3','LOCAL_PUBLIC','/assets/ngahiji/events/event-family-learning.svg','PUBLISHED'),
 ('public-assets','assets/ngahiji/events/event-entrepreneur-forum.svg','event-entrepreneur-forum.svg','image/svg+xml',null,1200,900,'Forum wirausaha Muslim dan diskusi komunitas','Muslim Entrepreneur Forum','Forum wirausaha Muslim dan diskusi komunitas.','ENTREPRENEUR','EVENTS','4:3','LOCAL_PUBLIC','/assets/ngahiji/events/event-entrepreneur-forum.svg','PUBLISHED'),
@@ -41,6 +41,11 @@ update public.media_items set image_url = '/assets/ngahiji/media/story-quran-stu
 update public.media_items set image_url = '/assets/ngahiji/media/story-community-discussion.svg' where slug = 'ngahiji-gerakan-bersama';
 update public.media_items set image_url = '/assets/ngahiji/media/story-family-learning.svg' where slug = 'ketenangan-dalam-kesibukan';
 update public.media_items set image_url = '/assets/ngahiji/media/story-volunteer-impact.svg' where slug = 'hal-kecil-berdampak-bersama';
+
+update public.media_assets
+set status = 'ARCHIVED'
+where source = 'LOCAL_PUBLIC'
+  and public_path in ('/assets/ngahiji/hero/hero-kajian.svg', '/assets/ngahiji/hero/hero-community.svg');
 
 notify pgrst, 'reload schema';
 commit;
