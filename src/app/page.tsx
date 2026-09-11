@@ -4,6 +4,8 @@ import NgahijiApp, { type CatalogEvent } from '@/components/NgahijiApp';
 import type { CommunityRecord, StoryRecord } from '@/lib/ngahiji-content';
 import { getLiveStreamFeed } from '@/lib/live-streams/service';
 import type { LiveStreamFeed } from '@/lib/live-streams/types';
+import { getCurrentProfile } from '@/lib/auth/server';
+import { getRoleRedirect } from '@/lib/auth/shared';
 
 export const revalidate = 300;
 
@@ -33,20 +35,30 @@ export default async function Home() {
   }
 
     let liveFeed: LiveStreamFeed | null = null;
-  try {
-    liveFeed = await getLiveStreamFeed();
-  } catch {
-    liveFeed = null;
-  }
+    try {
+      liveFeed = await getLiveStreamFeed();
+    } catch {
+      liveFeed = null;
+    }
 
-  return (
-    <NgahijiApp
-      communities={communities}
-      events={events}
-      stories={stories}
-      catalogError={catalogError}
-      contentError={contentError}
-      liveFeed={liveFeed}
-    />
-  );
+    const profile = await getCurrentProfile();
+    const viewer = profile
+      ? {
+          name: profile.full_name || profile.email || 'Member',
+          role: profile.role,
+          homeHref: getRoleRedirect(profile.role)
+        }
+      : null;
+
+    return (
+      <NgahijiApp
+        communities={communities}
+        events={events}
+        stories={stories}
+        catalogError={catalogError}
+        contentError={contentError}
+        liveFeed={liveFeed}
+        viewer={viewer}
+      />
+    );
 }
