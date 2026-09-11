@@ -4,9 +4,10 @@ Migration reviewed: `supabase/migrations/20260911000100_foundation.sql`.
 Additional content migration: `supabase/migrations/20260911000200_content_foundation.sql`.
 RBAC role migration: `supabase/migrations/20260911000300_rbac_roles.sql`.
 SUPER_ADMIN helper migration: `supabase/migrations/20260911000400_super_admin_role.sql`.
+Content CMS policy migration: `supabase/migrations/20260911000500_content_super_admin_policies.sql`.
 Initial production content seed: `supabase/seed/initial_content.sql`.
 
-The foundation, content, RBAC role, and SUPER_ADMIN helper migrations were applied to the linked Supabase project on 2026-09-11 after dry-runs. No reset, table drop, or destructive migration was run.
+The foundation, content, RBAC role, SUPER_ADMIN helper, and content CMS policy migrations were applied to the linked Supabase project on 2026-09-11 after dry-runs. No reset, table drop, or destructive migration was run.
 
 The initial production content seed was applied idempotently with `insert ... on conflict do update`. No deletes were run.
 
@@ -39,6 +40,7 @@ Resolution:
 - Explicit grants avoid relying on Supabase defaults.
 - `organizer_members.role` accepts production CMS roles: `SUPER_ADMIN`, `ADMIN`, `EVENT_MANAGER`, `EDITOR`, `CHECKIN_OPERATOR`, `SPONSOR_MANAGER`, and `ORGANIZER`.
 - `private.has_role()` now treats `SUPER_ADMIN` as an elevated organizer role for existing RLS policies and event publish guards.
+- `media_staff_write` and `community_staff_write` now allow `SUPER_ADMIN`, `ADMIN`, and `EDITOR`.
 
 ## Weaknesses / Follow-Up Before Staging
 
@@ -49,4 +51,4 @@ Resolution:
 - `profiles` does not yet update `updated_at` automatically. Add a profile trigger before profile editing is shipped.
 - Audit logging records catalog writes, but there is no authorized server read path for admins yet.
 - Status transition rules are minimal. A formal workflow table or transition function will be needed before editorial review is operated by multiple roles.
-- No policies or schema exist yet for auth sessions, orders, attendees, payments, official tickets, QR verification, check-in, email, WhatsApp, sponsors, live, media CMS, or analytics.
+- No policies or schema exist yet for orders, attendees, payments, official tickets, QR verification, check-in, email, WhatsApp, sponsors, live content, advanced media assets/storage, or analytics.

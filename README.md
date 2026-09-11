@@ -133,6 +133,30 @@ Not active yet:
 - transaction-safe ticket inventory
 - orders/payment/ticket issuance
 
+## Media CMS
+
+`/admin/media` is now a real protected Media CMS surface backed by Supabase `media_items`.
+
+Current capabilities:
+
+- list media items from Supabase
+- create media item
+- edit media item
+- publish
+- unpublish to `DRAFT`
+- archive
+- manage title, slug, category, format, excerpt, body, image URL, reading time, publish date, and SEO fields
+
+Publishing remains protected by Supabase RLS. `SUPER_ADMIN`, `ADMIN`, and `EDITOR` can manage media/community content through the content CMS policies.
+
+Not active yet:
+
+- Supabase Storage uploads
+- media asset metadata table
+- dynamic `/media/[slug]` public route
+- author management
+- rich text editor
+
 ## Original Files
 
 The original source files are intentionally kept in place:
