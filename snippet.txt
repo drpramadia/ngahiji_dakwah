@@ -1,0 +1,2164 @@
+ NGAHIJI — PRODUCTION READY IMPLEMENTATION MASTER PROMPT
+## Digital Event, Media, Community, Ticketing & Organizer Platform
+
+Kamu bertindak sebagai:
+- Senior Full-Stack Engineer
+- Software Architect
+- Product Engineer
+- UX Engineer
+- Database Architect
+- DevOps Engineer
+- Security Engineer
+
+Saya memiliki sebuah project website/platform bernama:
+
+NGAHIJI
+Tagline:
+"TEMPAT KEBAIKAN BERTEMU."
+
+Organization:
+Ngahiji Dakwah Organizer (NDO)
+
+Instagram resmi:
+https://www.instagram.com/ngahiji_dakwah/
+Handle:
+@ngahiji_dakwah
+
+==================================================
+0. OBJECTIVE
+==================================================
+
+Project ini JANGAN diperlakukan sebagai landing page atau prototype.
+
+Saya ingin mengubah existing demo/design menjadi platform yang secara arsitektur benar-benar siap menuju production.
+
+Target platform:
+
+NGAHIJI
+├── Events
+├── Ticketing
+├── Registration
+├── Digital Ticket
+├── QR Check-in
+├── Media
+├── Live
+├── Community
+├── Membership
+├── Sponsors
+├── Organizer / Punya Event?
+├── Analytics
+└── Admin CMS
+
+Tujuan akhirnya:
+
+1. Public website
+2. Event discovery platform
+3. Free registration
+4. Paid ticketing
+5. Digital ticket
+6. Unique QR ticket
+7. Event check-in
+8. Media platform
+9. Live streaming
+10. Community
+11. Audience database
+12. Sponsor management
+13. Organizer platform
+14. Admin CMS
+15. Analytics
+16. Monetization-ready architecture
+
+IMPORTANT:
+
+JANGAN membangun ulang UI dari nol.
+
+Existing UI/design adalah:
+
+"LOCKED DESIGN SOURCE OF TRUTH"
+
+Design Freeze:
+NGAHIJI DESIGN FREEZE v1.0
+
+Pertahankan:
+- typography
+- spacing
+- colors
+- layout
+- card geometry
+- navigation
+- responsive behavior
+- button style
+- animation
+- page transitions
+- mobile navigation
+- ticket design
+- visual identity
+- existing assets
+- existing logo treatment
+
+Yang diubah adalah:
+
+DEMO DATA
+        ↓
+REAL DATA
+        ↓
+DATABASE
+        ↓
+AUTH
+        ↓
+CMS
+        ↓
+PAYMENT
+        ↓
+TICKETING
+        ↓
+QR CHECK-IN
+        ↓
+ANALYTICS
+
+Frontend harus tetap terlihat seperti design yang sudah dibuat.
+
+==================================================
+1. NON-NEGOTIABLE RULE
+==================================================
+
+Jangan membuat mock architecture yang terlihat production-ready tetapi sebenarnya tidak berfungsi.
+
+Jangan membuat:
+- fake database
+- fake authentication yang dianggap production
+- fake payment yang dianggap payment gateway
+- fake OAuth yang dianggap sudah terhubung
+- fake QR validation client-side
+- hardcoded event data
+- hardcoded ticket data
+- hardcoded homepage content
+- hardcoded Supabase secrets
+- localhost dependency
+- placeholder API yang dianggap selesai
+
+Jika sebuah integration belum mempunyai credential:
+
+Implementasikan architecture dan adapter-nya dengan benar.
+
+Gunakan:
+
+DEMO MODE
+
+tetapi beri tanda jelas:
+
+DEMO MODE
+
+Jangan pernah menyamarkan demo sebagai production integration.
+
+==================================================
+2. TECH STACK
+==================================================
+
+Gunakan:
+
+Frontend:
+- Next.js 16
+- React
+- TypeScript
+- Tailwind CSS
+
+UI:
+- existing design system
+- Lucide icons
+
+Animation:
+- Motion / Framer Motion
+- GSAP hanya jika benar-benar diperlukan
+
+Backend:
+- Next.js Server Components
+- Server Actions / Route Handlers
+- Supabase
+
+Database:
+- PostgreSQL via Supabase
+
+Authentication:
+- Supabase Auth
+
+Storage:
+- Supabase Storage
+
+Realtime:
+- Supabase Realtime jika diperlukan
+
+Payment:
+- Midtrans
+- Xendit adapter architecture
+
+Email:
+- transactional email provider adapter
+
+WhatsApp:
+- WhatsApp provider adapter
+
+Streaming:
+- YouTube Live / Cloudflare Stream / Mux adapter architecture
+
+Deployment:
+- Vercel
+
+Version control:
+- GitHub
+
+==================================================
+3. ARCHITECTURE
+==================================================
+
+Gunakan architecture yang memisahkan:
+
+UI
+↓
+Components
+↓
+Application Services
+↓
+Repositories / Data Access
+↓
+Supabase
+
+JANGAN membuat component langsung bergantung pada database query.
+
+Contoh:
+
+BAD:
+
+EventCard.tsx
+→ supabase.from("events")
+
+GOOD:
+
+EventCard
+→ getEvents()
+→ event repository
+→ Supabase
+
+Dengan demikian:
+
+Demo Data
+dan
+Production Data
+
+dapat diganti tanpa mengubah UI.
+
+==================================================
+4. DATA ABSTRACTION
+==================================================
+
+Buat service layer:
+
+getEvents()
+getFeaturedEvents()
+getUpcomingEvents()
+getEventBySlug()
+getEventById()
+
+getTicketTypes()
+getAvailableTickets()
+
+getMedia()
+getArticles()
+getVideos()
+getPodcasts()
+
+getSponsors()
+getPartners()
+
+getHomepage()
+
+getUserProfile()
+getUserTickets()
+getUserOrders()
+getUserEventHistory()
+
+getCommunities()
+getCommunityPosts()
+
+Jangan hardcode data langsung di page/component.
+
+==================================================
+5. DEMO DATA
+==================================================
+
+Pindahkan demo data ke:
+
+/data/demo/
+
+Contoh:
+
+demoEvents.ts
+demoTickets.ts
+demoUsers.ts
+demoMedia.ts
+demoSponsors.ts
+demoSpeakers.ts
+demoCommunities.ts
+
+Demo mode tetap bisa berjalan tanpa Supabase.
+
+Production mode membaca Supabase.
+
+Gunakan environment:
+
+NEXT_PUBLIC_APP_MODE=demo
+
+atau:
+
+NEXT_PUBLIC_APP_MODE=production
+
+Jangan membuat dua frontend berbeda.
+
+Hanya data provider yang berubah.
+
+==================================================
+6. DATABASE
+==================================================
+
+Buat PostgreSQL schema yang benar.
+
+Minimal tabel:
+
+users
+profiles
+roles
+permissions
+
+events
+event_categories
+event_speakers
+event_schedules
+event_media
+event_faqs
+
+ticket_types
+orders
+order_items
+tickets
+
+registrations
+attendees
+check_ins
+
+payments
+payment_transactions
+
+promo_codes
+
+media
+articles
+videos
+podcasts
+
+communities
+community_members
+community_posts
+
+notifications
+
+sponsors
+sponsor_campaigns
+
+partners
+
+organizers
+
+homepage_sections
+pages
+
+analytics_events
+
+consents
+
+audit_logs
+
+==================================================
+7. RELATIONSHIP
+==================================================
+
+Gunakan relationship:
+
+USER
+ ↓
+PROFILE
+ ↓
+EVENT
+ ↓
+REGISTRATION
+ ↓
+ORDER
+ ↓
+ATTENDEE
+ ↓
+TICKET
+ ↓
+QR
+ ↓
+CHECK-IN
+ ↓
+EVENT HISTORY
+ ↓
+RECOMMENDATION
+
+Buyer dan attendee HARUS dipisahkan.
+
+Contoh:
+
+User A membeli 3 tiket.
+
+Order:
+1
+
+Attendees:
+- User A
+- Friend B
+- Friend C
+
+Tickets:
+- Ticket A
+- Ticket B
+- Ticket C
+
+Setiap attendee:
+- full_name
+- email
+- instagram
+- whatsapp
+- verification_status
+
+memiliki ticket unik.
+
+==================================================
+8. AUTHENTICATION
+==================================================
+
+Authentication menggunakan Supabase Auth.
+
+Support:
+
+Google
+Email
+WhatsApp OTP jika provider tersedia
+
+Instagram JANGAN digunakan sebagai authentication provider.
+
+Instagram hanya profile/audience field.
+
+Required audience fields:
+
+Full Name
+Email
+Instagram Username
+WhatsApp Number
+
+Authentication dan audience profile harus dipisahkan.
+
+==================================================
+9. USER REGISTRATION
+==================================================
+
+Flow:
+
+EVENT DETAIL
+↓
+GET TICKET
+↓
+LOGIN / REGISTER
+↓
+SELECT TICKET
+↓
+QUANTITY
+↓
+ADD FRIEND
+↓
+ATTENDEE INFORMATION
+↓
+VERIFICATION
+↓
+CONSENT
+↓
+ORDER SUMMARY
+↓
+PAYMENT
+↓
+SUCCESS
+↓
+DIGITAL TICKET
+
+==================================================
+10. ADD FRIEND
+==================================================
+
+Jika membeli lebih dari satu ticket:
+
++ ADD FRIEND
++ ADD ANOTHER FRIEND
+
+Setiap friend harus mempunyai:
+
+Full Name
+Email
+Instagram
+WhatsApp
+
+Friend tidak boleh hanya menjadi nama tambahan di order.
+
+Friend harus menjadi attendee entity.
+
+Jika memungkinkan gunakan:
+
+CLAIM MY TICKET
+
+Friend menerima link claim.
+
+Friend melakukan verification.
+
+Setelah verification:
+
+attendee menjadi registered/verified audience.
+
+==================================================
+11. CONSENT
+==================================================
+
+Wajib:
+
+Terms & Conditions
+Privacy Policy
+
+Opsional:
+
+WhatsApp updates
+Email updates
+Marketing communication
+Partner / sponsor communication
+
+Marketing consent TIDAK BOLEH mandatory.
+
+Simpan:
+
+consent_type
+consent_status
+timestamp
+privacy_policy_version
+
+==================================================
+12. TICKETING
+==================================================
+
+Setiap ticket:
+
+ticket_id
+order_id
+event_id
+attendee_id
+ticket_type_id
+qr_token
+status
+payment_status
+verification_status
+check_in_status
+
+QR harus unik.
+
+Jangan gunakan QR yang hanya berisi:
+
+ticket_id
+
+Gunakan secure random token.
+
+QR validation dilakukan SERVER-SIDE.
+
+Jangan mempercayai status dari client.
+
+==================================================
+13. PAYMENT
+==================================================
+
+Implementasikan payment abstraction:
+
+PaymentProvider
+
+Adapter:
+
+MidtransProvider
+XenditProvider
+
+Status:
+
+PENDING
+PROCESSING
+SUCCESS
+FAILED
+EXPIRED
+CANCELLED
+REFUNDED
+
+Webhook HARUS diverifikasi.
+
+Jangan mengubah status payment hanya berdasarkan frontend redirect.
+
+Flow:
+
+Order
+↓
+Payment
+↓
+Gateway
+↓
+Webhook
+↓
+Server verification
+↓
+Payment status
+↓
+Ticket activation
+
+Ticket hanya valid setelah payment confirmed.
+
+==================================================
+14. DEMO PAYMENT
+==================================================
+
+Jika credentials payment gateway belum tersedia:
+
+Gunakan:
+
+DEMO PAYMENT MODE
+
+Flow:
+
+Pending
+↓
+Processing
+↓
+Success
+
+Tetapi UI harus jelas menampilkan:
+
+DEMO MODE
+
+Jangan mengklaim bahwa payment gateway sudah live.
+
+==================================================
+15. DIGITAL TICKET
+==================================================
+
+Design harus premium.
+
+Mobile-first.
+
+Ticket berisi:
+
+NGAHIJI
+
+Event Name
+Date
+Time
+Venue
+
+Attendee Name
+Instagram
+Ticket Type
+
+Ticket ID
+Order ID
+
+QR
+
+Payment Status
+Verification Status
+Check-in Status
+
+Actions:
+
+View Event
+Share
+Download
+
+Future:
+
+Add to Wallet
+
+Mobile ticket harus bisa swipe jika multiple tickets.
+
+==================================================
+16. QR CHECK-IN
+==================================================
+
+Admin Check-in:
+
+/admin/check-in
+
+Features:
+
+Camera scanner
+Manual ticket lookup
+Demo Scan Ticket
+
+Validation:
+
+VALID
+ALREADY USED
+INVALID
+WRONG EVENT
+UNPAID
+CANCELLED
+REFUNDED
+
+Jika valid:
+
+ticket.status → CHECKED_IN
+check_in timestamp
+operator_id
+
+QR validation server-side.
+
+Gunakan transaction/atomic operation untuk mencegah double check-in.
+
+==================================================
+17. EVENT CMS
+==================================================
+
+Admin harus dapat:
+
+Create event
+Edit event
+Preview event
+Publish
+Unpublish
+Archive
+
+Fields:
+
+Title
+Slug
+Description
+Category
+Date
+Time
+Venue
+Location
+Hero image
+Gallery
+Speakers
+Schedule
+FAQ
+Ticket types
+Quota
+Price
+Promo
+Sponsors
+SEO metadata
+
+Workflow:
+
+DRAFT
+↓
+REVIEW
+↓
+APPROVED
+↓
+PUBLISHED
+
+Tidak semua role boleh publish.
+
+==================================================
+18. ONE EVENT TEMPLATE
+==================================================
+
+JANGAN membuat:
+
+event1.tsx
+event2.tsx
+event3.tsx
+
+Gunakan:
+
+/events/[slug]
+
+Semua event berasal dari database.
+
+Event baru dibuat melalui CMS.
+
+Tidak perlu developer mengubah code untuk membuat event baru.
+
+==================================================
+19. HOMEPAGE CMS
+==================================================
+
+Homepage terdiri dari CMS-managed sections:
+
+Hero
+Featured Events
+Upcoming Events
+Live
+Media
+Community
+Sponsors
+CTA
+
+Admin dapat:
+
+enable/disable
+reorder
+edit content
+choose featured events
+change images
+change CTA
+
+Tetapi:
+
+CMS TIDAK BOLEH mengubah design system.
+
+CMS mengubah:
+
+CONTENT
+
+bukan:
+
+DESIGN
+
+==================================================
+20. MEDIA CMS
+==================================================
+
+Admin dapat membuat:
+
+Article
+Video
+Podcast
+Gallery
+
+Fields:
+
+Title
+Slug
+Excerpt
+Content
+Thumbnail
+Category
+Author
+Publish date
+SEO metadata
+Status
+
+Support:
+
+DRAFT
+PUBLISHED
+ARCHIVED
+
+==================================================
+21. MEDIA LIBRARY
+==================================================
+
+Buat Media Library.
+
+Admin dapat:
+
+Upload
+Preview
+Search
+Filter
+Delete/archive
+Reuse asset
+
+Metadata:
+
+filename
+storage_path
+mime_type
+file_size
+width
+height
+alt_text
+created_at
+
+Storage buckets:
+
+public-assets
+event-assets
+media-assets
+sponsor-assets
+speaker-assets
+
+Gunakan abstraction:
+
+getAssetUrl()
+resolveMedia()
+
+Jangan hardcode Supabase storage URL di components.
+
+==================================================
+22. USER PROFILE
+==================================================
+
+Route:
+
+/profile
+
+atau:
+
+/my-ngahiji
+
+Sections:
+
+Profile
+My Tickets
+Event History
+Saved Events
+Notifications
+Community
+Media
+Preferences
+Consent
+
+==================================================
+23. MY TICKETS
+==================================================
+
+User dapat melihat:
+
+Upcoming
+Past
+Used
+Cancelled
+
+Ticket detail.
+
+QR.
+
+Event detail.
+
+Order detail.
+
+==================================================
+24. ADMIN CMS
+==================================================
+
+Route:
+
+/admin
+
+Dashboard
+
+Modules:
+
+Dashboard
+Events
+Tickets
+Orders
+Attendees
+Check-in
+Media
+Live
+Community
+Members
+Sponsors
+Partners
+Analytics
+Settings
+
+==================================================
+25. ROLES
+==================================================
+
+Implementasikan:
+
+SUPER_ADMIN
+ADMIN
+EVENT_MANAGER
+EDITOR
+CHECKIN_OPERATOR
+SPONSOR_MANAGER
+ORGANIZER
+
+Gunakan:
+
+RBAC
+
+Jangan hanya menyembunyikan menu.
+
+Authorization harus dilakukan server-side.
+
+==================================================
+26. RLS
+==================================================
+
+Supabase Row Level Security WAJIB digunakan.
+
+Rules:
+
+Public:
+read published events
+read published media
+read public sponsors
+
+User:
+read/update own profile
+read own tickets
+read own orders
+read own registrations
+
+Organizer:
+access own events
+
+Check-in operator:
+access check-in functions
+
+Admin:
+role-based access
+
+Sensitive data tidak boleh public.
+
+==================================================
+27. SECURITY
+==================================================
+
+Implement:
+
+RLS
+RBAC
+Server-side authorization
+Input validation
+Zod
+Rate limiting architecture
+CSRF protection where applicable
+Webhook signature verification
+Secure random ticket token
+Audit logs
+
+Jangan expose:
+
+SUPABASE_SERVICE_ROLE_KEY
+MIDTRANS_SERVER_KEY
+XENDIT_SECRET_KEY
+OAuth secrets
+
+Semua secret server-side.
+
+==================================================
+28. AUDIT LOG
+==================================================
+
+Simpan:
+
+who
+what
+when
+object
+old_value
+new_value
+
+Contoh:
+
+ADMIN changed ticket price
+100000 → 125000
+
+==================================================
+29. ANALYTICS
+==================================================
+
+Track funnel:
+
+Visit
+↓
+View Event
+↓
+Get Ticket
+↓
+Login
+↓
+Registration
+↓
+Verification
+↓
+Checkout
+↓
+Payment
+↓
+Ticket
+↓
+Check-in
+
+Admin analytics:
+
+Visitors
+Event views
+Registrations
+Tickets sold
+Revenue
+Conversion rate
+Check-in rate
+Popular events
+Ticket type performance
+
+==================================================
+30. PRIVACY
+==================================================
+
+Audience data adalah first-party asset.
+
+JANGAN menjual personal data.
+
+Sponsor analytics hanya:
+
+aggregated
+anonymized
+
+Contoh:
+
+Age range
+City distribution
+Event attendance
+Interest based on event interaction
+
+Jangan menggunakan sensitive personal attributes untuk recommendation.
+
+==================================================
+31. SPONSOR MODULE
+==================================================
+
+Sponsor management:
+
+Sponsor
+Campaign
+Event
+Placement
+CTA
+Media
+Impression
+Engagement
+Conversion
+
+Admin dashboard:
+
+Sponsor performance
+Campaign performance
+Event reach
+
+==================================================
+32. ORGANIZER PLATFORM
+==================================================
+
+Create:
+
+"PUNYA EVENT?"
+
+Flow:
+
+Organizer registration
+↓
+Create Event
+↓
+Landing Page
+↓
+Registration
+↓
+Ticketing
+↓
+Payment
+↓
+QR
+↓
+Check-in
+↓
+Analytics
+↓
+Report
+
+Organizer hanya dapat melihat event miliknya.
+
+==================================================
+33. MONETIZATION ARCHITECTURE
+==================================================
+
+Prepare architecture for:
+
+Ticketing fee
+Platform fee
+Event management fee
+Media partner package
+Sponsorship
+Advertising
+Streaming sponsorship
+Membership
+Merchandise
+B2B event platform
+Organizer SaaS
+Promo placement
+
+Jangan implementasi semua payment model sekarang.
+
+Tetapi database dan service architecture harus memungkinkan dikembangkan.
+
+==================================================
+34. RECOMMENDATION ENGINE
+==================================================
+
+Prepare:
+
+getRecommendedEvents(userId)
+
+Recommendation berdasarkan:
+
+event history
+saved events
+category interaction
+location level yang aman
+
+JANGAN menggunakan sensitive attributes.
+
+==================================================
+35. NOTIFICATION
+==================================================
+
+Prepare notification system:
+
+In-app
+Email
+WhatsApp
+
+Events:
+
+registration success
+payment success
+ticket issued
+event reminder
+event update
+ticket claimed
+check-in confirmation
+
+Gunakan notification queue/adapter architecture jika diperlukan.
+
+==================================================
+36. SEO
+==================================================
+
+Implement:
+
+metadata
+OpenGraph
+Twitter/X metadata
+sitemap
+robots.txt
+canonical
+structured data
+
+Event structured data bila sesuai.
+
+Dynamic:
+
+/events/[slug]
+
+Media:
+
+/media/[slug]
+
+==================================================
+37. PERFORMANCE
+==================================================
+
+Target:
+
+fast initial load
+optimized images
+lazy loading
+code splitting
+server components where appropriate
+minimal client JS
+
+Jangan menjadikan seluruh application:
+
+"use client"
+
+Gunakan Client Component hanya jika diperlukan.
+
+==================================================
+38. ACCESSIBILITY
+==================================================
+
+Implement:
+
+semantic HTML
+keyboard navigation
+focus states
+ARIA where necessary
+contrast
+screen reader support
+
+Touch target minimum sekitar 44px.
+
+Jangan bergantung pada hover.
+
+==================================================
+39. MOBILE-FIRST
+==================================================
+
+NON-NEGOTIABLE.
+
+Test:
+
+320
+360
+375
+390
+414
+430
+768
+1024
+1280
+1440
+1920
+
+Tidak boleh:
+
+horizontal overflow
+broken navigation
+tiny buttons
+hover-only functionality
+layout collision
+
+Mobile bottom navigation:
+
+Home
+Events
+Live
+Media
+Profile
+
+Mobile harus terasa seperti premium mobile app.
+
+==================================================
+40. DESIGN SYSTEM
+==================================================
+
+Keep existing visual identity.
+
+Core personality:
+
+Contemporary Islamic Culture
+×
+Creative Festival
+×
+Premium Digital Product
+×
+Gen-Z Community Platform
+
+Avoid:
+
+generic Islamic website
+excessive green/gold
+mosque silhouettes
+generic SaaS
+Bootstrap look
+excessive glassmorphism
+excessive gradients
+
+Visual balance:
+
+70% elegant
+20% playful
+10% unexpected
+
+==================================================
+41. TYPOGRAPHY
+==================================================
+
+Logo NGAHIJI adalah custom handwritten/script wordmark.
+
+JANGAN mengganti seluruh website menjadi script.
+
+Typography system:
+
+80–90% modern sans-serif
+
+Use one:
+
+Sora
+Plus Jakarta Sans
+Inter
+Space Grotesk
+
+Script wordmark digunakan sebagai accent:
+
+hero campaign
+emotional statement
+section intro
+special CTA
+community statement
+success state
+
+Contoh:
+
+LET'S NGAHIJI
+TEMPAT KEBAIKAN BERTEMU
+KETEMU
+BARENG
+
+JANGAN gunakan script untuk:
+
+body text
+navigation
+forms
+ticket IDs
+prices
+payment status
+dense UI
+
+Logo asset tetap menjadi source of truth.
+
+==================================================
+42. MOTION
+==================================================
+
+Animation harus premium.
+
+Gunakan:
+
+scroll reveal
+image reveal
+text reveal
+spring interaction
+page transition
+subtle parallax
+magnetic desktop button jika sesuai
+ticket interaction
+QR reveal
+live indicator
+marquee
+
+Jangan membuat animation berlebihan.
+
+Respect:
+
+prefers-reduced-motion
+
+==================================================
+43. SOCIAL
+==================================================
+
+Gunakan Instagram resmi:
+
+https://www.instagram.com/ngahiji_dakwah/
+
+Display:
+
+@ngahiji_dakwah
+
+Semua CTA Instagram harus mengarah ke akun tersebut.
+
+Desktop:
+open new tab
+
+Mobile:
+gunakan deep link bila supported,
+fallback ke web.
+
+Jangan membuat URL social lain yang tidak diberikan.
+
+==================================================
+44. ENVIRONMENT
+==================================================
+
+Buat:
+
+.env.example
+
+Minimal:
+
+NEXT_PUBLIC_APP_URL=
+NEXT_PUBLIC_APP_MODE=
+
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+
+SUPABASE_SERVICE_ROLE_KEY=
+
+MIDTRANS_SERVER_KEY=
+MIDTRANS_CLIENT_KEY=
+
+XENDIT_SECRET_KEY=
+
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+EMAIL_PROVIDER_KEY=
+WHATSAPP_PROVIDER_KEY=
+
+STREAM_PROVIDER_KEY=
+
+Jangan commit .env.
+
+==================================================
+45. SUPABASE MIGRATION
+==================================================
+
+JANGAN membuat database secara manual saja melalui dashboard.
+
+Gunakan:
+
+/supabase/migrations
+
+Buat migration yang reproducible.
+
+Seed:
+
+/supabase/seed
+
+Harus dapat dilakukan:
+
+supabase db reset
+
+dan database kembali dalam kondisi yang konsisten.
+
+==================================================
+46. STORAGE
+==================================================
+
+Implementasikan storage architecture.
+
+Admin upload:
+
+event hero
+event gallery
+speaker image
+article image
+video thumbnail
+sponsor logo
+homepage assets
+
+Database menyimpan metadata.
+
+UI hanya menerima media abstraction.
+
+==================================================
+47. ERROR HANDLING
+==================================================
+
+Setiap halaman penting harus mempunyai:
+
+loading
+error
+empty
+not-found
+
+States.
+
+Contoh:
+
+No events yet
+No tickets
+Payment failed
+Ticket expired
+Event unavailable
+
+Jangan menampilkan blank screen.
+
+==================================================
+48. FORM VALIDATION
+==================================================
+
+Gunakan Zod.
+
+Validasi:
+
+email
+WhatsApp
+Instagram username
+ticket quantity
+attendee data
+promo code
+payment data
+
+Validasi harus dilakukan:
+
+client-side
+
+dan
+
+server-side
+
+==================================================
+49. CHECKOUT SECURITY
+==================================================
+
+Jangan percaya:
+
+price dari client
+ticket availability dari client
+total dari client
+payment status dari client
+
+Server harus menghitung ulang:
+
+ticket price
+quantity
+discount
+tax/fee jika applicable
+grand total
+
+==================================================
+50. INVENTORY / QUOTA
+==================================================
+
+Ticket quota harus aman dari overselling.
+
+Implementasikan transaction/atomic reservation.
+
+Contoh:
+
+Regular:
+quota 100
+
+Jika dua user membeli bersamaan,
+jangan sampai quota menjadi -1.
+
+==================================================
+51. ORDER STATE MACHINE
+==================================================
+
+Gunakan state yang jelas:
+
+DRAFT
+PENDING_PAYMENT
+PROCESSING
+PAID
+FAILED
+EXPIRED
+CANCELLED
+REFUNDED
+
+Ticket activation:
+
+PAID only.
+
+==================================================
+52. EVENT STATE
+==================================================
+
+Event:
+
+DRAFT
+REVIEW
+APPROVED
+PUBLISHED
+SOLD_OUT
+ONGOING
+COMPLETED
+ARCHIVED
+CANCELLED
+
+==================================================
+53. NO DEAD BUTTON
+==================================================
+
+Semua button harus:
+
+- bekerja
+atau
+- disabled dengan alasan
+atau
+- memiliki proper state.
+
+Jangan membuat button yang terlihat aktif tetapi tidak melakukan apa-apa.
+
+==================================================
+54. ADMIN DASHBOARD
+==================================================
+
+Dashboard harus menampilkan:
+
+Total Events
+Upcoming Events
+Tickets Sold
+Revenue
+Registrations
+Check-ins
+Conversion
+
+Recent Orders
+
+Recent Registrations
+
+Event performance.
+
+==================================================
+55. CMS CONTENT MODEL
+==================================================
+
+Dynamic content harus berasal dari CMS.
+
+Admin dapat mengubah:
+
+Homepage hero
+Featured event
+Event information
+Media
+Sponsors
+Partners
+CTA
+Announcements
+
+Tanpa menyentuh code.
+
+==================================================
+56. DESIGN LOCK
+==================================================
+
+PENTING:
+
+Admin CMS TIDAK boleh mengubah:
+
+font system
+spacing system
+border radius system
+button geometry
+navigation architecture
+color tokens
+animation behavior
+
+CMS hanya mengubah content.
+
+==================================================
+57. FILE STRUCTURE
+==================================================
+
+Buat struktur yang bersih.
+
+Contoh:
+
+/app
+  /(public)
+  /events
+  /media
+  /live
+  /community
+  /my-tickets
+  /profile
+
+  /admin
+    /events
+    /tickets
+    /orders
+    /attendees
+    /check-in
+    /media
+    /sponsors
+    /analytics
+    /settings
+
+/components
+  /ui
+  /events
+  /tickets
+  /media
+  /community
+  /admin
+
+/lib
+  /auth
+  /db
+  /payments
+  /ticketing
+  /notifications
+  /analytics
+  /storage
+  /repositories
+  /validation
+
+/data
+  /demo
+
+/types
+
+/supabase
+  /migrations
+  /seed
+
+/public
+
+==================================================
+58. CODE QUALITY
+==================================================
+
+TypeScript strict.
+
+Hindari:
+
+any
+
+sebisa mungkin.
+
+Tidak boleh:
+
+unused imports
+console errors
+broken routes
+broken images
+missing keys
+hydration errors
+TypeScript errors
+
+Run:
+
+npm run lint
+npm run typecheck
+npm run build
+
+Semua harus berhasil.
+
+==================================================
+59. PRODUCTION CONFIG
+==================================================
+
+Jangan hardcode:
+
+localhost
+127.0.0.1
+development-only URLs
+
+Gunakan:
+
+NEXT_PUBLIC_APP_URL
+
+untuk production URL.
+
+==================================================
+60. DEPLOYMENT
+==================================================
+
+Target:
+
+GitHub
+↓
+Vercel
+↓
+Supabase
+
+Buat README lengkap:
+
+Installation
+Environment setup
+Supabase setup
+Migration
+Seed
+Storage setup
+Auth setup
+Google OAuth
+Payment setup
+Webhook setup
+Email setup
+WhatsApp setup
+Deployment
+Production checklist
+Troubleshooting
+
+==================================================
+61. TESTING
+==================================================
+
+Minimal test critical flow:
+
+REGISTER
+LOGIN
+CREATE EVENT
+PUBLISH EVENT
+CREATE TICKET
+BUY TICKET
+PAYMENT
+WEBHOOK
+TICKET GENERATION
+QR VALIDATION
+CHECK-IN
+
+Critical security test:
+
+User A cannot access User B ticket.
+
+Organizer A cannot access Organizer B event.
+
+Check-in operator cannot access unnecessary sensitive data.
+
+Unauthenticated user cannot access admin.
+
+==================================================
+62. CMS ACCEPTANCE TEST
+==================================================
+
+Test:
+
+1. Login admin
+2. Create test event
+3. Upload hero image
+4. Create Regular ticket
+5. Price Rp100.000
+6. Quota 100
+7. Publish
+8. Open public website
+9. Event appears
+10. Buy ticket
+11. Change price to Rp125.000
+12. Verify checkout
+13. Unpublish event
+14. Verify event disappears from public listing
+
+Tidak boleh membutuhkan perubahan code.
+
+==================================================
+63. DEMO EVENT
+==================================================
+
+Use:
+
+Event:
+NGAHIJI YOUTH DAY
+
+Date:
+28 September 2026
+
+Location:
+Bandung
+
+Tickets:
+
+Regular
+Rp75.000
+
+VIP
+Rp150.000
+
+VVIP
+Rp300.000
+
+Demo user:
+
+Dio Prama
+@dioprama
++62 812 0000 0000
+
+Demo friends:
+
+Alya
+Raka
+
+IMPORTANT:
+
+Data tersebut adalah DEMO DATA.
+
+==================================================
+64. CURRENT IMPLEMENTATION STRATEGY
+==================================================
+
+Kerjakan dengan urutan:
+
+PHASE 1
+AUDIT EXISTING PROJECT
+
+PHASE 2
+LOCK UI
+
+PHASE 3
+CREATE TYPES
+
+PHASE 4
+CREATE DATA ABSTRACTION
+
+PHASE 5
+CREATE DATABASE SCHEMA
+
+PHASE 6
+CREATE SUPABASE MIGRATIONS
+
+PHASE 7
+CREATE AUTH
+
+PHASE 8
+CREATE CMS
+
+PHASE 9
+CREATE EVENT SYSTEM
+
+PHASE 10
+CREATE REGISTRATION
+
+PHASE 11
+CREATE TICKETING
+
+PHASE 12
+CREATE PAYMENT ADAPTER
+
+PHASE 13
+CREATE DIGITAL TICKET
+
+PHASE 14
+CREATE QR CHECK-IN
+
+PHASE 15
+CREATE MEDIA CMS
+
+PHASE 16
+CREATE SPONSOR SYSTEM
+
+PHASE 17
+CREATE ANALYTICS
+
+PHASE 18
+CREATE NOTIFICATION ARCHITECTURE
+
+PHASE 19
+SECURITY / RLS / RBAC
+
+PHASE 20
+TESTING
+
+PHASE 21
+PERFORMANCE
+
+PHASE 22
+SEO
+
+PHASE 23
+DEPLOYMENT
+
+==================================================
+65. IMPORTANT IMPLEMENTATION RULE
+==================================================
+
+Jangan mencoba mengerjakan semuanya secara asal dalam satu file atau satu komponen.
+
+Jika existing project sudah mempunyai component:
+
+REUSE IT.
+
+Jika existing page sudah bagus:
+
+DO NOT REDESIGN IT.
+
+Jika existing animation sudah bagus:
+
+PRESERVE IT.
+
+Jika existing asset sudah tersedia:
+
+REUSE IT.
+
+Jika data masih hardcoded:
+
+PINDAHKAN ke data abstraction.
+
+Jika UI membutuhkan data:
+
+buat typed interface.
+
+==================================================
+66. PRODUCTION READINESS DEFINITION
+==================================================
+
+Project dianggap siap production hanya jika:
+
+[ ] Build berhasil
+[ ] TypeScript clean
+[ ] Lint clean
+[ ] Supabase schema reproducible
+[ ] RLS aktif
+[ ] RBAC aktif
+[ ] Auth berjalan
+[ ] User profile berjalan
+[ ] CMS berjalan
+[ ] Event CRUD berjalan
+[ ] Event publish/unpublish berjalan
+[ ] Ticket quota aman
+[ ] Registration berjalan
+[ ] Attendee berjalan
+[ ] Order berjalan
+[ ] Payment adapter siap
+[ ] Webhook verification siap
+[ ] Digital ticket berjalan
+[ ] QR unik
+[ ] QR server validation
+[ ] Check-in berjalan
+[ ] Admin dashboard berjalan
+[ ] Media library berjalan
+[ ] SEO berjalan
+[ ] Error states tersedia
+[ ] Mobile responsive
+[ ] Accessibility dasar
+[ ] Secrets aman
+[ ] Environment production siap
+[ ] Vercel deployment siap
+[ ] README lengkap
+[ ] No dead buttons
+[ ] No hardcoded production data
+[ ] No localhost dependency
+
+==================================================
+67. FINAL RULE
+==================================================
+
+Jangan berhenti setelah membuat UI.
+
+Saya tidak membutuhkan:
+
+"looks production-ready"
+
+Saya membutuhkan:
+
+"architecturally ready for production deployment"
+
+Namun jangan berpura-pura integration sudah LIVE jika credentials atau external service belum tersedia.
+
+Jika external credential belum tersedia:
+
+BUILD THE ADAPTER
++
+BUILD THE CONFIGURATION
++
+BUILD THE DEMO FALLBACK
++
+DOCUMENT THE FINAL CONNECTION STEP.
+
+==================================================
+68. FIRST ACTION
+==================================================
+
+SEBELUM menulis banyak code:
+
+1. Audit seluruh existing project.
+2. Identifikasi framework/version.
+3. Identifikasi struktur folder.
+4. Identifikasi existing pages.
+5. Identifikasi existing components.
+6. Identifikasi existing assets.
+7. Identifikasi hardcoded demo data.
+8. Identifikasi existing routes.
+9. Identifikasi dependency.
+10. Identifikasi bagian yang sudah dapat digunakan kembali.
+11. Identifikasi bagian yang harus direfactor.
+12. Identifikasi risiko production.
+
+Kemudian buat:
+
+A. CURRENT ARCHITECTURE
+B. TARGET ARCHITECTURE
+C. GAP ANALYSIS
+D. IMPLEMENTATION PLAN
+E. DATABASE PLAN
+F. SECURITY PLAN
+G. DEPLOYMENT PLAN
+
+Setelah itu implementasikan secara bertahap.
+
+Jangan menghancurkan existing UI.
+
+Jangan melakukan redesign tanpa alasan.
+
+==================================================
+END OF MASTER PROMPT
+==================================================
