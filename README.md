@@ -237,6 +237,19 @@ Not active yet:
 - scanner endpoint
 - wallet/download actions
 
+## Integration / Payment Status
+
+`/admin/settings` reports environment and provider readiness without displaying secret values.
+
+Payment gateway is intentionally not active yet. The payment provider foundation in `src/lib/payments/providers.ts` checks Midtrans/Xendit configuration and blocks payment intent creation instead of simulating success.
+
+Current status:
+
+- no fake payment success
+- no frontend-trusted payment confirmation
+- no webhook endpoint until provider secrets and signature verification are implemented
+- no production checkout activation without Midtrans/Xendit configuration
+
 ## Original Files
 
 The original source files are intentionally kept in place:
