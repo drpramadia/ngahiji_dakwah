@@ -2,9 +2,10 @@
 
 Migration reviewed: `supabase/migrations/20260911000100_foundation.sql`.
 Additional content migration: `supabase/migrations/20260911000200_content_foundation.sql`.
+RBAC role migration: `supabase/migrations/20260911000300_rbac_roles.sql`.
 Initial production content seed: `supabase/seed/initial_content.sql`.
 
-The foundation and content migrations were applied to the linked Supabase project on 2026-09-11 after a dry-run. No reset, drop, or destructive migration was run.
+The foundation, content, and RBAC role migrations were applied to the linked Supabase project on 2026-09-11 after dry-runs. No reset, table drop, or destructive migration was run.
 
 The initial production content seed was applied idempotently with `insert ... on conflict do update`. No deletes were run.
 
@@ -35,6 +36,7 @@ Resolution:
 - Non-admin organizer members are blocked from approving, publishing, or archiving events through `private.guard_event()`.
 - `audit_logs` has no browser-facing grants or policies.
 - Explicit grants avoid relying on Supabase defaults.
+- `organizer_members.role` accepts production CMS roles: `SUPER_ADMIN`, `ADMIN`, `EVENT_MANAGER`, `EDITOR`, `CHECKIN_OPERATOR`, `SPONSOR_MANAGER`, and `ORGANIZER`.
 
 ## Weaknesses / Follow-Up Before Staging
 

@@ -65,6 +65,7 @@ Migrations:
 
 - `supabase/migrations/20260911000100_foundation.sql`
 - `supabase/migrations/20260911000200_content_foundation.sql`
+- `supabase/migrations/20260911000300_rbac_roles.sql`
 
 Initial content seed:
 
@@ -90,6 +91,19 @@ npx supabase db query --linked --file supabase/seed/initial_content.sql
 ```
 
 Never use `supabase db reset` against the linked remote project.
+
+## Admin / CMS Foundation
+
+Routes:
+
+- `/admin/login` - Supabase Auth magic-link login.
+- `/auth/callback` - exchanges Supabase auth code for a session cookie.
+- `/admin` - server-side protected dashboard.
+- `/admin/events`, `/admin/tickets`, `/admin/orders`, `/admin/attendees`, `/admin/check-in`, `/admin/media`, `/admin/live`, `/admin/community`, `/admin/sponsors`, `/admin/analytics`, `/admin/settings` - protected CMS module entry points.
+
+Access requires Supabase Auth plus a matching row in `public.organizer_members`. See `docs/admin-bootstrap.md` for the server-side bootstrap SQL template.
+
+Current admin metrics read real database counts for events, ticket types, media items, and communities. Orders, revenue, check-ins, and conversion rate are explicitly marked as not configured until their production schemas exist.
 
 ## Original Files
 
