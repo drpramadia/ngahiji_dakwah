@@ -1,4 +1,4 @@
-import { getCatalogService, isDemoMode } from '@/lib/catalog-runtime';
+import { getCatalogService } from '@/lib/catalog-runtime';
 import { getPublicContentService } from '@/lib/content-runtime';
 import NgahijiApp, { type CatalogEvent } from '@/components/NgahijiApp';
 import type { CommunityRecord, StoryRecord } from '@/lib/ngahiji-content';
@@ -31,7 +31,6 @@ export default async function Home() {
   return (
     <NgahijiApp
       communities={communities}
-      demoMode={isDemoMode()}
       events={events}
       stories={stories}
       catalogError={catalogError}

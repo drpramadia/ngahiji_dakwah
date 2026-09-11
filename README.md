@@ -34,16 +34,15 @@ Working now:
 
 - Next.js App Router + TypeScript app shell.
 - Public Ngahiji homepage sections from the prototype: hero, events, live, media, community, moments, organizer CTA, closing, footer, and mobile dock.
+- Public `Masuk`, `Join Ngahiji`, and mobile `Profile` entry points are active through Supabase Auth and `/profile`.
 - Event cards loaded through the catalog service boundary.
 - Event detail modal.
-- Multi-participant demo registration flow.
+- Multi-participant ticket simulation flow with payment gateway simulation and ticket/QR preview.
 - Story/category filtering.
-- Explicit DEMO labels for simulated registration, live, tickets, email, WhatsApp, and profile flows.
 - Demo catalog repository and Supabase catalog adapter.
 
 Still demo / not production:
 
-- Authentication and account creation.
 - Orders and payment.
 - Official ticket issuance.
 - QR validation and check-in.
@@ -267,6 +266,8 @@ Current status:
 - no frontend-trusted payment confirmation
 - no webhook endpoint until provider secrets and signature verification are implemented
 - no production checkout activation without Midtrans/Xendit configuration
+
+Public ticket/payment UI remains explicitly marked as simulation until provider configuration, server-side payment verification, official ticket issuance, and QR validation are implemented.
 
 ## Original Files
 
