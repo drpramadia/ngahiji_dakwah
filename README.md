@@ -18,11 +18,13 @@ Open http://localhost:3000.
 Copy `.env.example` to `.env.local` for local work. Do not commit `.env.local`.
 
 ```bash
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=https://ngahiji-dakwah.vercel.app
 NEXT_PUBLIC_DEMO_MODE=true
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-public-anon-key
 ```
+
+`NEXT_PUBLIC_APP_URL` is used for Supabase Magic Link redirects. In Vercel, set it to the deployed production URL so email verification links return to `https://ngahiji-dakwah.vercel.app/auth/callback` instead of localhost.
 
 `NEXT_PUBLIC_DEMO_MODE=true` is required for local demo data. Production mode must set `NEXT_PUBLIC_DEMO_MODE=false` and provide Supabase URL + anon key. Production catalog errors are surfaced; the app does not silently fallback to demo data.
 

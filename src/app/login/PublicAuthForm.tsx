@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import { getAuthRedirectUrl } from '@/lib/app-url';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 
 type Props = {
@@ -20,7 +21,7 @@ export default function PublicAuthForm({ mode }: Props) {
     setError(null);
 
     const supabase = createSupabaseBrowserClient();
-    const redirectTo = `${window.location.origin}/auth/callback?next=/profile`;
+  const redirectTo = getAuthRedirectUrl('/profile', window.location.origin);
     const { error: authError } = await supabase.auth.signInWithOtp({
       email,
       options: {
