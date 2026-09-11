@@ -157,6 +157,29 @@ Not active yet:
 - author management
 - rich text editor
 
+## Community CMS
+
+`/admin/community` is now a real protected Community CMS surface backed by Supabase `communities`.
+
+Current capabilities:
+
+- list communities from Supabase
+- create community
+- edit community
+- publish
+- unpublish to `DRAFT`
+- archive
+- manage name, slug, visual mark, color, description, and sort order
+
+Published communities are read by the existing public Community section through the content service. The public section design remains unchanged.
+
+Not active yet:
+
+- community posts
+- community membership
+- community moderation
+- member-only content
+
 ## Original Files
 
 The original source files are intentionally kept in place:
