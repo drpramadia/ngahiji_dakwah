@@ -21,10 +21,10 @@ export default function AdminLoginForm() {
       const redirectTo = getAuthRedirectUrl('/admin', window.location.origin);
       const { error: authError } = await supabase.auth.signInWithOtp({
         email: email.trim(),
-        options: { emailRedirectTo: redirectTo, shouldCreateUser: false }
+        options: { emailRedirectTo: redirectTo }
       });
       if (authError) throw authError;
-      setStatus('Magic link dikirim. Buka email untuk masuk ke dashboard admin.');
+      setStatus('Magic link dikirim. Buka email untuk masuk. Otorisasi role akan dicek setelah verifikasi.');
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Gagal mengirim magic link.');
     } finally {
@@ -49,7 +49,7 @@ export default function AdminLoginForm() {
       </button>
       {status && <p className="admin-status">{status}</p>}
       {error && <p className="admin-error" role="alert">{error}</p>}
-      <p className="notice">Hanya akun terdaftar di <code>organizer_members</code> yang bisa mengakses dashboard. shouldCreateUser=false.</p>
+      <p className="notice">Cara masuk: kirim magic link ke email admin. Setelah kamu klik link, sistem akan cek role di <code>organizer_members</code>. Kalau tidak terdaftar, kamu akan diarahkan ke halaman unauthorized.</p>
     </form>
   );
 }
