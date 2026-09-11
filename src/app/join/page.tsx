@@ -27,7 +27,7 @@ export default async function JoinPage({ searchParams }: Props) {
           <p>Buat akun Ngahiji untuk bergabung dengan event, kajian, dan komunitas.</p>
         </div>
         <div className="auth-panel-wrap">
-          <PublicAuthPanel mode="join" next={next || '/'} />
+        <PublicAuthPanel mode="join" next={next || '/member'} />
         </div>
         <footer className="auth-footer">
           Dengan bergabung kamu menyetujui aturan komunitas Ngahiji.

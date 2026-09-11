@@ -27,7 +27,7 @@ export default async function LoginPage({ searchParams }: Props) {
           <p>Satu akun untuk event, kajian, media, dan komunitas Ngahiji.</p>
         </div>
         <div className="auth-panel-wrap">
-          <PublicAuthPanel mode="login" next={next || '/'} />
+          <PublicAuthPanel mode="login" next={next || '/member'} />
         </div>
         <footer className="auth-footer">
           Dengan bergabung kamu menyetujui aturan komunitas Ngahiji.

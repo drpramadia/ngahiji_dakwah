@@ -34,7 +34,11 @@ export default function EmailOTPForm({ next = '/' }: Props) {
       setStatus('Kode OTP dikirim ke email. Cek inbox atau klik magic link.');
       setStep('verify');
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Gagal mengirim OTP.');
+      const raw = caught instanceof Error ? caught.message : 'Gagal mengirim OTP.';
+      const isRateLimit = /rate.?limit|too.?many|exceed/i.test(raw);
+      setError(isRateLimit
+        ? 'Terlalu banyak permintaan email. Coba lagi 5-10 menit atau gunakan Google login (jika tersedia).'
+        : raw);
     } finally {
       setPending(false);
     }
@@ -77,6 +81,7 @@ export default function EmailOTPForm({ next = '/' }: Props) {
         <button className="btn" type="submit" disabled={pending}>
           {pending ? 'Mengirim...' : 'Kirim OTP / Magic Link'}
         </button>
+        <p className="notice">Cek inbox <em>dan folder Spam/Promosi</em>. Email biasanya masuk &lt;1 menit. Kalau tidak masuk dalam 5 menit, hubungi admin (SMTP mungkin belum dikonfigurasi).</p>
         {status && <p className="admin-status">{status}</p>}
         {error && <p className="admin-error" role="alert">{error}</p>}
       </form>
