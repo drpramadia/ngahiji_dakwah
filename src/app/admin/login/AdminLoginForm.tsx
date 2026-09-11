@@ -1,33 +1,32 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
-import { getAuthRedirectUrl } from '@/lib/app-url';
 
 export default function AdminLoginForm() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<string | null>(null);
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPending(true);
-    setStatus(null);
     setError(null);
 
     try {
       const supabase = createSupabaseBrowserClient();
-      const redirectTo = getAuthRedirectUrl('/admin', window.location.origin);
-      const { error: authError } = await supabase.auth.signInWithOtp({
+      const { error: authError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
-        options: { emailRedirectTo: redirectTo }
+        password
       });
       if (authError) throw authError;
-      setStatus('Magic link dikirim. Buka email untuk masuk. Otorisasi role akan dicek setelah verifikasi.');
+      router.refresh();
+      router.push('/admin');
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Gagal mengirim magic link.');
-    } finally {
+      setError(caught instanceof Error ? caught.message : 'Login gagal.');
       setPending(false);
     }
   }
@@ -42,14 +41,23 @@ export default function AdminLoginForm() {
         onChange={(e) => setEmail(e.target.value)}
         required
         autoComplete="email"
-        placeholder="admin@ngahiji.id"
+        placeholder="admin@ngahiji.com"
+      />
+      <label htmlFor="adminPassword">Password</label>
+      <input
+        id="adminPassword"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+        autoComplete="current-password"
+        minLength={6}
       />
       <button className="btn" type="submit" disabled={pending}>
-        {pending ? 'Mengirim magic link...' : 'Kirim Magic Link'}
+        {pending ? 'Memeriksa...' : 'Login ke CMS'}
       </button>
-      {status && <p className="admin-status">{status}</p>}
       {error && <p className="admin-error" role="alert">{error}</p>}
-      <p className="notice">Cara masuk: kirim magic link ke email admin. Setelah kamu klik link, sistem akan cek role di <code>organizer_members</code>. Kalau tidak terdaftar, kamu akan diarahkan ke halaman unauthorized.</p>
+      <p className="notice">Login langsung dengan password Supabase. Otorisasi role dicek server-side di <code>organizer_members</code> setelah masuk.</p>
     </form>
   );
 }
