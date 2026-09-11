@@ -3,9 +3,10 @@
 Migration reviewed: `supabase/migrations/20260911000100_foundation.sql`.
 Additional content migration: `supabase/migrations/20260911000200_content_foundation.sql`.
 RBAC role migration: `supabase/migrations/20260911000300_rbac_roles.sql`.
+SUPER_ADMIN helper migration: `supabase/migrations/20260911000400_super_admin_role.sql`.
 Initial production content seed: `supabase/seed/initial_content.sql`.
 
-The foundation, content, and RBAC role migrations were applied to the linked Supabase project on 2026-09-11 after dry-runs. No reset, table drop, or destructive migration was run.
+The foundation, content, RBAC role, and SUPER_ADMIN helper migrations were applied to the linked Supabase project on 2026-09-11 after dry-runs. No reset, table drop, or destructive migration was run.
 
 The initial production content seed was applied idempotently with `insert ... on conflict do update`. No deletes were run.
 
@@ -37,6 +38,7 @@ Resolution:
 - `audit_logs` has no browser-facing grants or policies.
 - Explicit grants avoid relying on Supabase defaults.
 - `organizer_members.role` accepts production CMS roles: `SUPER_ADMIN`, `ADMIN`, `EVENT_MANAGER`, `EDITOR`, `CHECKIN_OPERATOR`, `SPONSOR_MANAGER`, and `ORGANIZER`.
+- `private.has_role()` now treats `SUPER_ADMIN` as an elevated organizer role for existing RLS policies and event publish guards.
 
 ## Weaknesses / Follow-Up Before Staging
 

@@ -66,6 +66,7 @@ Migrations:
 - `supabase/migrations/20260911000100_foundation.sql`
 - `supabase/migrations/20260911000200_content_foundation.sql`
 - `supabase/migrations/20260911000300_rbac_roles.sql`
+- `supabase/migrations/20260911000400_super_admin_role.sql`
 
 Initial content seed:
 
@@ -104,6 +105,33 @@ Routes:
 Access requires Supabase Auth plus a matching row in `public.organizer_members`. See `docs/admin-bootstrap.md` for the server-side bootstrap SQL template.
 
 Current admin metrics read real database counts for events, ticket types, media items, and communities. Orders, revenue, check-ins, and conversion rate are explicitly marked as not configured until their production schemas exist.
+
+## Event CMS
+
+`/admin/events` is now a real protected Event CMS surface backed by Supabase `events` and `ticket_types`.
+
+Current capabilities:
+
+- list events from Supabase
+- create event
+- edit event
+- update the primary ticket type
+- publish
+- unpublish to `DRAFT`
+- archive
+
+Publishing remains protected by Supabase RLS and `private.guard_event()`. `SUPER_ADMIN` now works as an elevated organizer role through `private.has_role()`.
+
+Not active yet:
+
+- gallery uploads
+- speakers
+- schedules
+- FAQs
+- sponsors
+- promo codes
+- transaction-safe ticket inventory
+- orders/payment/ticket issuance
 
 ## Original Files
 
