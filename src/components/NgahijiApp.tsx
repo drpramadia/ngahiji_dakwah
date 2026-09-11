@@ -101,10 +101,15 @@ export default function NgahijiApp({ communities, events, stories, catalogError,
           </nav>
           <div className="navright">
             <button className="iconbtn" aria-label="Cari event dan cerita" onClick={() => setModal({ type: 'search' })}><Search /></button>
-            {viewer ? (
-              <a className="btn" href={viewer.homeHref}>
-                <UserRound size={14} /> {viewer.role === 'ADMIN' ? 'Admin' : viewer.role === 'ORGANIZER' ? 'Organizer' : 'My Ngahiji'} <span>↗</span>
-              </a>
+                        {viewer ? (
+              <>
+                <a className="btn" href={viewer.homeHref}>
+                  <UserRound size={14} /> {viewer.role === 'ADMIN' ? 'Admin' : viewer.role === 'ORGANIZER' ? 'Organizer' : 'My Ngahiji'} <span>↗</span>
+                </a>
+                <form action="/api/logout" method="POST">
+                  <button className="btn light desktop" type="submit" title="Keluar">Keluar</button>
+                </form>
+              </>
             ) : (
               <>
                 <button className="btn light desktop" onClick={() => setModal({ type: 'auth', mode: 'login' })}>Masuk</button>
