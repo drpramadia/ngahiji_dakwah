@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import { requireAdmin } from '@/lib/admin/auth';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { updateOrderStatus, getOrderById } from './service';
+import { issueTicketsForOrder } from '@/lib/tickets/issue';
 import type { CreateOrderInput } from './action-types';
 
 const UUID_RE = /^[0-9a-f-]{36}$/i;
@@ -175,8 +176,19 @@ export async function approvePaymentAction(formData: FormData): Promise<void> {
     });
   }
 
+  // Issue QR tickets (idempotent). Failure here should NOT roll back the
+  // approval, but should surface a clear error so admin can retry.
+  try {
+    const issuedCount = await issueTicketsForOrder(orderId);
+    console.log(`[approvePayment] issued ${issuedCount} tickets for order ${orderId}`);
+  } catch (err) {
+    console.error(`[approvePayment] ticket issuance failed for ${orderId}:`, err);
+  }
+
   revalidatePath('/admin/payments');
   revalidatePath(`/checkout/${orderId}`);
+  revalidatePath(`/tickets/${orderId}`);
+  revalidatePath('/member');
 }
 
 export async function rejectPaymentAction(formData: FormData): Promise<void> {

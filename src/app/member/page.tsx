@@ -94,9 +94,9 @@ export default async function MemberPage() {
               const firstItem = o.items?.[0] ?? null;
               const ticket = pick(firstItem?.ticket);
               return (
-                <Link key={o.id} className="member-order" href={`/checkout/${o.id}`}>
+                <Link key={o.id} className="member-order" href={o.status === 'PAID' ? `/tickets/${o.id}` : `/checkout/${o.id}`}>
                   <div>
-                    <div className="eyebrow">{STATUS_LABEL[o.status] ?? o.status}</div>
+                    <div className="eyebrow">{STATUS_LABEL[o.status] ?? o.status}{o.status === 'PAID' ? ' · Lihat tiket ↗' : ''}</div>
                     <strong>{ev?.title ?? '(event tidak ditemukan)'}</strong>
                     <small>{ev?.city} · {fmtDate(ev?.starts_at ?? null)}</small>
                   </div>

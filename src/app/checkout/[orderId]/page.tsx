@@ -56,7 +56,10 @@ export default async function CheckoutPage({ params }: Props) {
             {order.status === 'PAID' && (
               <div className="admin-status">
                 <strong>Pembayaran terverifikasi.</strong><br />
-                Tiket kamu aktif. Cek email untuk detail QR (fitur delivery akan diaktifkan bertahap).
+                Tiket kamu aktif. Klik tombol di bawah untuk melihat &amp; download QR tiket.
+                <div style={{ marginTop: 12 }}>
+                  <Link className="btn lime" href={`/tickets/${order.id}`}>Buka tiket saya ↗</Link>
+                </div>
               </div>
             )}
             {order.status === 'FAILED' && (
