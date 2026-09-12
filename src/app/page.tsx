@@ -9,39 +9,49 @@ import { getRoleRedirect } from '@/lib/auth/shared';
 
 export const revalidate = 300;
 
-export default async function Home() {
-  let events: CatalogEvent[] = [];
-  let catalogError: string | null = null;
-  let stories: StoryRecord[] = [];
-  let communities: CommunityRecord[] = [];
-  let contentError: string | null = null;
-
+async function loadCatalog(): Promise<{ events: CatalogEvent[]; error: string | null }> {
   try {
     const catalog = getCatalogService();
     const records = await catalog.getFeaturedEvents();
-    events = await Promise.all(records.map(async (event) => ({
+    const events = await Promise.all(records.map(async (event) => ({
       ...event,
       tickets: await catalog.getTicketTypes(event.id)
     })));
-  } catch (error) {
-    catalogError = error instanceof Error ? error.message : 'Catalog service failed';
+    return { events, error: null };
+  } catch {
+    return { events: [], error: 'Event sedang diperbarui. Silakan kembali beberapa saat lagi.' };
   }
+}
 
-    try {
+async function loadContent(): Promise<{ stories: StoryRecord[]; communities: CommunityRecord[]; error: string | null }> {
+  try {
     const content = getPublicContentService();
-    [stories, communities] = await Promise.all([content.getStories(), content.getCommunities()]);
-  } catch (error) {
-    contentError = error instanceof Error ? error.message : 'Content service failed';
+    const [stories, communities] = await Promise.all([content.getStories(), content.getCommunities()]);
+    return { stories, communities, error: null };
+  } catch {
+    return { stories: [], communities: [], error: 'Stories sedang diperbarui. Silakan kembali beberapa saat lagi.' };
   }
+}
 
-    let liveFeed: LiveStreamFeed | null = null;
-    try {
-      liveFeed = await getLiveStreamFeed();
-    } catch {
-      liveFeed = null;
-    }
+async function loadLive(): Promise<LiveStreamFeed | null> {
+  try {
+    return await getLiveStreamFeed();
+  } catch {
+    return null;
+  }
+}
 
-    const profile = await getCurrentProfile();
+export default async function Home() {
+  // Parallel fetch to prevent 10s function timeout on cold starts.
+  const [catalog, content, liveFeed, profile] = await Promise.all([
+    loadCatalog(),
+    loadContent(),
+    loadLive(),
+    getCurrentProfile()
+  ]);
+
+  const { events, error: catalogError } = catalog;
+  const { stories, communities, error: contentError } = content;
     const viewer = profile
       ? {
           name: profile.full_name || profile.email || 'Member',
