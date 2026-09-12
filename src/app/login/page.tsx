@@ -2,7 +2,7 @@ import Link from 'next/link';
 import PublicAuthPanel from '@/components/PublicAuthPanel';
 import { getCurrentProfile } from '@/lib/auth/server';
 import { getRoleRedirect } from '@/lib/auth/shared';
-import { signOutAdmin } from '@/app/admin/actions';
+import { signOutPublic } from '@/app/actions/auth';
 
 export const metadata = { title: 'Masuk - Ngahiji' };
 
@@ -32,7 +32,7 @@ export default async function LoginPage({ searchParams }: Props) {
               <Link className="btn" href={next || getRoleRedirect(profile.role)}>
                 Lanjut ke {profile.role === 'ADMIN' ? 'Admin' : profile.role === 'ORGANIZER' ? 'Organizer' : 'Member Area'} ↗
               </Link>
-              <form action={signOutAdmin}>
+              <form action={signOutPublic}>
                 <button className="btn light" type="submit" style={{ width: '100%' }}>Logout</button>
               </form>
             </div>
@@ -45,7 +45,7 @@ export default async function LoginPage({ searchParams }: Props) {
               <p>Satu akun untuk event, kajian, media, dan komunitas Ngahiji.</p>
             </div>
             <div className="auth-panel-wrap">
-              <PublicAuthPanel mode="login" next={next || '/member'} />
+              <PublicAuthPanel mode="login" next={next || '/'} />
             </div>
           </>
         )}

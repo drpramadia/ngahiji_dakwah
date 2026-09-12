@@ -12,7 +12,7 @@ type Props = {
 const GOOGLE_ENABLED = process.env.NEXT_PUBLIC_AUTH_GOOGLE_ENABLED === 'true';
 const PHONE_ENABLED = process.env.NEXT_PUBLIC_AUTH_PHONE_ENABLED === 'true';
 
-export default function PublicAuthPanel({ next = '/member' }: Props) {
+export default function PublicAuthPanel({ next = '/' }: Props) {
   return (
     <div className="public-auth-panel">
       {GOOGLE_ENABLED && (

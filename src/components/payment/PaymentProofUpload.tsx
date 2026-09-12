@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { uploadPaymentProofAction } from '@/lib/payments/qris/actions';
 
 type Props = {
@@ -15,6 +15,18 @@ export default function PaymentProofUpload({ orderId, disabled }: Props) {
   const [isPending, startTransition] = useTransition();
   const fileRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  function safeSet<T>(setter: (v: T) => void, value: T) {
+    if (mountedRef.current) setter(value);
+  }
 
   function onSelect(files: FileList | null) {
     setError(null);
@@ -23,7 +35,8 @@ export default function PaymentProofUpload({ orderId, disabled }: Props) {
     setFile(f);
     if (f && f.type.startsWith('image/')) {
       const reader = new FileReader();
-      reader.onload = () => setPreview(String(reader.result));
+      reader.onload = () => safeSet(setPreview, String(reader.result));
+      reader.onerror = () => safeSet(setPreview, null);
       reader.readAsDataURL(f);
     } else {
       setPreview(null);
@@ -41,12 +54,14 @@ export default function PaymentProofUpload({ orderId, disabled }: Props) {
     startTransition(async () => {
       try {
         await uploadPaymentProofAction(fd);
-        setStatus('Bukti pembayaran berhasil diunggah. Tim NGAHIJI akan verifikasi maks. 1x24 jam.');
-        setFile(null);
-        setPreview(null);
-        if (fileRef.current) fileRef.current.value = '';
+        // revalidatePath in the server action may unmount this component.
+        // Guard subsequent state updates to prevent React error #441.
+        safeSet(setStatus, 'Bukti pembayaran berhasil diunggah. Tim NGAHIJI akan verifikasi maks. 1x24 jam.');
+        safeSet(setFile, null);
+        safeSet(setPreview, null);
+        if (mountedRef.current && fileRef.current) fileRef.current.value = '';
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Upload gagal');
+        safeSet(setError, err instanceof Error ? err.message : 'Upload gagal');
       }
     });
   }

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { getRoleRedirect } from '@/lib/auth/shared';
 import { updateProfileAction } from './actions';
-import { signOutAdmin } from '@/app/admin/actions';
+import { signOutPublic } from '@/app/actions/auth';
 
 export const metadata = { title: 'Profil - Ngahiji' };
 
@@ -157,7 +157,7 @@ export default async function ProfilePage() {
               {role === 'ADMIN' ? '→ Admin Dashboard' : role === 'ORGANIZER' ? '→ Organizer' : '→ My Ngahiji'}
             </Link>
           </span>
-          <form action={signOutAdmin}>
+          <form action={signOutPublic}>
             <button className="btn light" type="submit">Logout</button>
           </form>
         </footer>

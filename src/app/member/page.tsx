@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { signOutAdmin } from '@/app/admin/actions';
+import { signOutPublic } from '@/app/actions/auth';
 
 export const metadata = { title: 'Member Area - Ngahiji' };
 
@@ -112,7 +112,7 @@ export default async function MemberPage() {
 
         <footer className="auth-footer">
           <span>Kamu masuk sebagai <strong>{user.email}</strong></span>
-          <form action={signOutAdmin}>
+          <form action={signOutPublic}>
             <button className="btn light" type="submit">Logout</button>
           </form>
         </footer>
