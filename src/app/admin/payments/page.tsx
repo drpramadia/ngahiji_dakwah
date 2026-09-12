@@ -27,6 +27,7 @@ export default async function AdminPaymentsPage() {
             <h1>Payments.</h1>
             <p>Verifikasi pembayaran QRIS manual. Approve akan set order PAID, ticket aktif.</p>
           </div>
+          <Link className="btn light" href="/admin/payments/settings">QRIS settings ↗</Link>
         </div>
 
         <h2 className="admin-section-heading">Menunggu Verifikasi ({pending.length})</h2>

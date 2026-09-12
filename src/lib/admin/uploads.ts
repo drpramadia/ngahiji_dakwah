@@ -22,7 +22,7 @@ export async function uploadAssetAction(formData: FormData): Promise<UploadResul
   const folder = String(formData.get('folder') ?? '').replace(/^\/+|\/+$/g, '');
   const file = formData.get('file');
 
-  const allowedBuckets: UploadBucket[] = ['public-assets', 'event-assets', 'media-assets', 'sponsor-assets', 'speaker-assets'];
+  const allowedBuckets: UploadBucket[] = ['public-assets', 'event-assets', 'media-assets', 'sponsor-assets', 'speaker-assets', 'payment-assets'];
   if (!allowedBuckets.includes(bucketRaw as UploadBucket)) {
     throw new Error(`Invalid bucket: ${bucketRaw}`);
   }

@@ -1,4 +1,4 @@
-export type UploadBucket = 'public-assets' | 'event-assets' | 'media-assets' | 'sponsor-assets' | 'speaker-assets';
+export type UploadBucket = 'public-assets' | 'event-assets' | 'media-assets' | 'sponsor-assets' | 'speaker-assets' | 'payment-assets';
 
 export type UploadResult = {
   publicUrl: string;

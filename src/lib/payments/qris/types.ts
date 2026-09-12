@@ -6,6 +6,9 @@ export type PaymentSettings = {
   qr_image_url: string;
   merchant_name: string;
   instructions: string;
+  bank_name: string | null;
+  account_name: string | null;
+  account_number: string | null;
   active: boolean;
 };
 

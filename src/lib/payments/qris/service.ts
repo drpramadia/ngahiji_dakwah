@@ -6,7 +6,7 @@ export async function getActivePaymentSettings(): Promise<PaymentSettings | null
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from('payment_settings')
-    .select('id, payment_method, qr_image_url, merchant_name, instructions, active')
+    .select('id, payment_method, qr_image_url, merchant_name, instructions, bank_name, account_name, account_number, active')
     .eq('active', true)
     .order('updated_at', { ascending: false })
     .limit(1)
