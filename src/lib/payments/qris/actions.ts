@@ -1,18 +1,14 @@
 'use server';
 
+
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { requireAdmin } from '@/lib/admin/auth';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { updateOrderStatus, getOrderById } from './service';
+import type { CreateOrderInput } from './action-types';
 
 const UUID_RE = /^[0-9a-f-]{36}$/i;
-
-export type CreateOrderInput = {
-  eventId: string;
-  ticketTypeId: string;
-  quantity: number;
-};
 
 export async function createOrderAction(input: CreateOrderInput): Promise<{ orderId: string }> {
   if (!UUID_RE.test(input.eventId) || !UUID_RE.test(input.ticketTypeId)) {
@@ -73,6 +69,31 @@ export async function createOrderAction(input: CreateOrderInput): Promise<{ orde
       unit_price_idr: Number(ticket.price_idr)
     });
   if (itemError) throw new Error(`Gagal membuat order item: ${itemError.message}`);
+
+  // Persist attendees (best-effort; failure does not roll back order)
+  if (input.attendees && input.attendees.length > 0) {
+    const rows = input.attendees.slice(0, quantity).map((a, idx) => ({
+      registration_id: registration.id,
+      user_id: idx === 0 ? user.id : null,
+      full_name: (a.full_name || '').slice(0, 120) || `Peserta ${idx + 1}`,
+      email: (a.email || user.email || '').slice(0, 200),
+      whatsapp: (a.whatsapp || '').slice(0, 40),
+      instagram: (a.instagram || '').slice(0, 60)
+    }));
+    const { error: attErr } = await supabase.from('attendees').insert(rows);
+    if (attErr) console.warn(`[checkout] failed to insert attendees: ${attErr.message}`);
+  }
+
+  // Update buyer profile with any new contact info (best-effort)
+  if (input.buyer && (input.buyer.full_name || input.buyer.instagram || input.buyer.whatsapp)) {
+    const patch: Record<string, string> = {};
+    if (input.buyer.full_name) patch.full_name = input.buyer.full_name;
+    if (input.buyer.instagram) patch.instagram = input.buyer.instagram;
+    if (input.buyer.whatsapp) patch.whatsapp = input.buyer.whatsapp;
+    if (Object.keys(patch).length > 0) {
+      await supabase.from('profiles').update(patch).eq('id', user.id);
+    }
+  }
 
   return { orderId: order.id };
 }
