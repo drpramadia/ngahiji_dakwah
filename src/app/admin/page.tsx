@@ -15,7 +15,7 @@ const adminSections = [
   ['Attendees', '/admin/attendees', 'Belum aktif sampai registration schema tersedia.'],
   ['Check-in', '/admin/check-in', 'Belum aktif sampai ticket QR schema tersedia.'],
   ['Media', '/admin/media', 'Kelola artikel, video, podcast, dan gallery.'],
-  ['Live', '/admin/live', 'Kelola live content dan jadwal.'],
+  ['Live', '/admin/live', 'Kelola live stream YouTube dan featured video.'],
   ['Community', '/admin/community', 'Kelola kategori dan konten komunitas.'],
   ['Sponsors', '/admin/sponsors', 'Belum aktif sampai sponsor schema tersedia.'],
   ['Analytics', '/admin/analytics', 'Belum aktif sampai analytics schema tersedia.'],
