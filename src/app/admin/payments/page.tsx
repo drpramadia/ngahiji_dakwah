@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/admin/auth';
 import { getPendingPaymentsForAdmin } from '@/lib/payments/qris/service';
 import { approvePaymentAction, rejectPaymentAction } from '@/lib/payments/qris/actions';
 import PaymentProofLink from './PaymentProofLink';
+import ExpireOrdersButton from './ExpireOrdersButton';
 
 export const metadata = { title: 'Payments - Ngahiji Admin' };
 
@@ -27,7 +28,10 @@ export default async function AdminPaymentsPage() {
             <h1>Payments.</h1>
             <p>Verifikasi pembayaran QRIS manual. Approve akan set order PAID, ticket aktif.</p>
           </div>
-          <Link className="btn light" href="/admin/payments/settings">QRIS settings ↗</Link>
+          <div style={{ display: 'grid', gap: 8, justifyItems: 'end' }}>
+            <Link className="btn light" href="/admin/payments/settings">QRIS settings ↗</Link>
+            <ExpireOrdersButton />
+          </div>
         </div>
 
         <h2 className="admin-section-heading">Menunggu Verifikasi ({pending.length})</h2>
