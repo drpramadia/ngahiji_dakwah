@@ -2,10 +2,43 @@ import 'server-only';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { createSupabaseServiceClient } from '@/lib/supabase/service';
 import type { OrderSummary, OrderStatus, PaymentSettings, OrderWithContext } from './types';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export type OrderWithContextAndProof = OrderWithContext & {
+  proof_public_url: string | null;
+  /** Backward compat alias — same value as proof_public_url. */
   proof_signed_url: string | null;
 };
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+
+/**
+ * Build a public URL for a payment-proofs storage path.
+ * Bucket `payment-proofs` is set to public (see migration 20260911001400).
+ * Path uses order UUIDs which are unguessable, so exposure risk is minimal.
+ */
+export function buildPaymentProofUrl(storagePath: string | null): string | null {
+  if (!storagePath || !SUPABASE_URL) return null;
+  const clean = storagePath.replace(/^\/+/, '');
+  return `${SUPABASE_URL}/storage/v1/object/public/payment-proofs/${clean}`;
+}
+
+/**
+ * Try service-role client first (bypasses RLS, correct for admin pages that
+ * are already role-guarded via requireAdmin()). If SUPABASE_SERVICE_ROLE_KEY
+ * is not configured, fall back to the RLS-scoped anon client so at least
+ * matching orders (per organizer_members policy) still show up.
+ */
+async function getAdminClient(): Promise<{ client: SupabaseClient; mode: 'service' | 'anon' }> {
+  try {
+    const client = createSupabaseServiceClient();
+    return { client, mode: 'service' };
+  } catch (err) {
+    console.warn('[admin/payments] SUPABASE_SERVICE_ROLE_KEY missing, falling back to anon client:', err instanceof Error ? err.message : err);
+    const client = await createSupabaseServerClient();
+    return { client, mode: 'anon' };
+  }
+}
 
 export async function getActivePaymentSettings(): Promise<PaymentSettings | null> {
   const supabase = await createSupabaseServerClient();
@@ -32,17 +65,11 @@ export async function getOrderById(orderId: string): Promise<OrderSummary | null
 }
 
 /**
- * Admin query — uses SERVICE-ROLE client to bypass RLS.
- * SAFE: caller must call requireAdmin() first (see /admin/payments/page.tsx).
- *
- * Fix (2025-01): server-side (anon-client) query returned 0 rows because RLS
- * policy `orders_staff_all` requires the admin user to be in `organizer_members`
- * with a role matching the order's event/organizer. If mapping is missing or
- * incomplete, admin sees empty list even when orders exist. Service client
- * bypasses RLS entirely, which is correct behavior for a role-guarded page.
+ * Admin query — service-role preferred, falls back to anon on missing key.
+ * SAFE: caller must call requireAdmin() first.
  */
 export async function getPendingPaymentsForAdmin(): Promise<OrderWithContext[]> {
-  const supabase = createSupabaseServiceClient();
+  const { client: supabase, mode } = await getAdminClient();
   const { data, error } = await supabase
     .from('orders')
     .select(`id, event_id, buyer_id, status, subtotal_idr, fee_idr, discount_idr, total_idr, payment_proof_url, payment_uploaded_at, paid_at, verified_at, verified_by, rejection_reason, created_at,
@@ -50,12 +77,14 @@ export async function getPendingPaymentsForAdmin(): Promise<OrderWithContext[]> 
              items:order_items(quantity, ticket:ticket_types(name)),
              buyer:profiles(email, full_name)`)
     .in('status', ['PENDING_PAYMENT', 'WAITING_VERIFICATION', 'PAID', 'FAILED', 'EXPIRED'])
+    .order('payment_uploaded_at', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
     .limit(100);
   if (error) {
-    console.error('[getPendingPaymentsForAdmin] query error:', error.message);
+    console.error(`[getPendingPaymentsForAdmin] client=${mode} query error:`, error.message);
     return [];
   }
+  console.log(`[getPendingPaymentsForAdmin] client=${mode} rows=${data?.length ?? 0}`);
 
   type EventRel = { title: string; slug: string };
   type TicketRel = { name: string };
@@ -91,29 +120,22 @@ export async function getPendingPaymentsForAdmin(): Promise<OrderWithContext[]> 
 }
 
 /**
- * Same as getPendingPaymentsForAdmin() but also generates a short-lived signed
- * URL for each order's payment proof so the admin table can render a thumbnail
- * inline (no per-row click required).
+ * Same as getPendingPaymentsForAdmin() but attaches a public URL for each
+ * order's payment proof (no per-row click required).
+ *
+ * Public URL construction:
+ *   ${NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/payment-proofs/{path}
+ *
+ * Requires bucket `payment-proofs` to be public — see migration
+ * 20260911001400_payment_proofs_public.sql. `proof_signed_url` is kept as an
+ * alias for backward-compat with existing components.
  */
 export async function getPendingPaymentsWithSignedProofs(): Promise<OrderWithContextAndProof[]> {
   const orders = await getPendingPaymentsForAdmin();
-  if (orders.length === 0) return [];
-
-  const supabase = createSupabaseServiceClient();
-  const withProofs = await Promise.all(
-    orders.map(async (o) => {
-      if (!o.payment_proof_url) return { ...o, proof_signed_url: null };
-      const { data, error } = await supabase.storage
-        .from('payment-proofs')
-        .createSignedUrl(o.payment_proof_url, 600);
-      if (error) {
-        console.warn(`[proof-url] failed for order ${o.id}: ${error.message}`);
-        return { ...o, proof_signed_url: null };
-      }
-      return { ...o, proof_signed_url: data.signedUrl };
-    })
-  );
-  return withProofs;
+  return orders.map((o) => {
+    const url = buildPaymentProofUrl(o.payment_proof_url);
+    return { ...o, proof_public_url: url, proof_signed_url: url };
+  });
 }
 
 export async function updateOrderStatus(orderId: string, status: OrderStatus, patch: Partial<OrderSummary> = {}): Promise<void> {
