@@ -156,6 +156,7 @@ export async function approvePaymentAction(formData: FormData): Promise<void> {
   await updateOrderStatus(orderId, 'PAID', {
     paid_at: new Date().toISOString(),
     verified_at: new Date().toISOString(),
+    verified_by: user?.id ?? null,
     rejection_reason: null
   });
 
@@ -197,9 +198,13 @@ export async function rejectPaymentAction(formData: FormData): Promise<void> {
   const reason = String(formData.get('reason') ?? '').slice(0, 300);
   if (!UUID_RE.test(orderId)) throw new Error('Invalid order ID');
 
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   await updateOrderStatus(orderId, 'FAILED', {
     rejection_reason: reason || 'Pembayaran tidak dapat diverifikasi',
-    verified_at: new Date().toISOString()
+    verified_at: new Date().toISOString(),
+    verified_by: user?.id ?? null
   });
 
   revalidatePath('/admin/payments');

@@ -24,7 +24,7 @@ export async function getOrderById(orderId: string): Promise<OrderSummary | null
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from('orders')
-    .select('id, event_id, buyer_id, status, subtotal_idr, fee_idr, discount_idr, total_idr, payment_proof_url, payment_uploaded_at, paid_at, verified_at, rejection_reason, created_at')
+    .select('id, event_id, buyer_id, status, subtotal_idr, fee_idr, discount_idr, total_idr, payment_proof_url, payment_uploaded_at, paid_at, verified_at, verified_by, rejection_reason, created_at')
     .eq('id', orderId)
     .maybeSingle();
   if (error) return null;

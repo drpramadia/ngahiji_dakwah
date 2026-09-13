@@ -25,6 +25,7 @@ export type OrderSummary = {
   payment_uploaded_at: string | null;
   paid_at: string | null;
   verified_at: string | null;
+  verified_by: string | null;
   rejection_reason: string | null;
   created_at: string;
 };
