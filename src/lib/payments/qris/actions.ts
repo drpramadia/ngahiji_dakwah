@@ -160,21 +160,30 @@ export async function approvePaymentAction(formData: FormData): Promise<void> {
     rejection_reason: null
   });
 
-  // Update linked registration + payment_transaction record
+  // Update linked registration + payment_transaction record.
+  // These writes go through RLS (admin staff policies) — a policy miss
+  // affects 0 rows silently, so check results explicitly.
   const { data: order } = await supabase
     .from('orders')
     .select('registration_id, total_idr')
     .eq('id', orderId)
     .maybeSingle();
   if (order) {
-    await supabase.from('registrations').update({ status: 'CONFIRMED' }).eq('id', order.registration_id);
-    await supabase.from('payment_transactions').insert({
+    const { count: regCount, error: regError } = await supabase
+      .from('registrations')
+      .update({ status: 'CONFIRMED' }, { count: 'exact' })
+      .eq('id', order.registration_id);
+    if (regError) throw new Error(`Approve order ${orderId} gagal update registrasi: ${regError.message}`);
+    if (!regCount) throw new Error(`Approve order ${orderId} gagal: registrasi ${order.registration_id} tidak ditemukan atau tidak boleh diubah.`);
+
+    const { error: txError } = await supabase.from('payment_transactions').insert({
       order_id: orderId,
       provider: 'MANUAL_QRIS',
       status: 'PAID',
       amount_idr: order.total_idr ?? 0,
       raw_payload: { verified_by: user?.id ?? null, method: 'MANUAL_QRIS_APPROVAL' }
     });
+    if (txError) throw new Error(`Approve order ${orderId} gagal mencatat transaksi: ${txError.message}`);
   }
 
   // Issue QR tickets (idempotent). Failure here should NOT roll back the

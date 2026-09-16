@@ -31,7 +31,7 @@ function statusPill(status: string) {
 
 export default async function AdminPaymentsPage() {
   await requireAdmin();
-  const orders = await getPendingPaymentsWithSignedProofs();
+  const { orders, configError } = await getPendingPaymentsWithSignedProofs();
 
   const waiting = orders.filter((o) => o.status === 'WAITING_VERIFICATION');
   const pending = orders.filter((o) => o.status === 'PENDING_PAYMENT');
@@ -52,6 +52,14 @@ export default async function AdminPaymentsPage() {
             <ExpireOrdersButton />
           </div>
         </div>
+
+        {configError && (
+          <div className="admin-error" role="alert">
+            <strong>Konfigurasi payments bermasalah.</strong> {configError}
+            <br />
+            <small>Set SUPABASE_SERVICE_ROLE_KEY di environment lalu redeploy. Tanpa itu, daftar pembayaran tidak dapat dimuat.</small>
+          </div>
+        )}
 
         <h2 className="admin-section-heading">Menunggu Verifikasi ({waiting.length})</h2>
         <div className="payments-table" role="table" aria-label="Payments menunggu verifikasi">
