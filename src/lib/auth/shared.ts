@@ -12,6 +12,22 @@ export type Profile = {
   role: ProfileRole;
 };
 
+export const ADMIN_ROLES = ['SUPER_ADMIN', 'ADMIN', 'EVENT_MANAGER', 'EDITOR', 'CHECKIN_OPERATOR', 'SPONSOR_MANAGER', 'ORGANIZER'] as const;
+
+export function isAdminRole(role: string | null | undefined): boolean {
+  return (ADMIN_ROLES as readonly string[]).includes(String(role));
+}
+
+/**
+ * Post-login landing: a safe internal `next` param wins; otherwise admins go
+ * to the CMS and everyone else to the member area.
+ */
+export function resolvePostLoginTarget(next: string | null | undefined, isAdminMember: boolean): string {
+  const sanitized = next && next.startsWith('/') && !next.startsWith('//') && next !== '/' ? next : null;
+  if (sanitized) return sanitized;
+  return isAdminMember ? '/admin' : '/member';
+}
+
 export function getRoleRedirect(role: ProfileRole | null | undefined): string {
   switch (role) {
     case 'ADMIN':

@@ -46,12 +46,23 @@ export default async function AdminPage() {
           </div>
         </header>
         <div className="admin-grid">
-          {metrics.map((metric) => (
-            <article className={metric.status === 'ready' ? 'admin-card' : 'admin-card muted'} key={metric.label}>
-              <span>{metric.label}</span>
-              <strong>{metric.value}</strong>
-            </article>
-          ))}
+          {metrics.map((metric) => {
+            const content = (
+              <>
+                <span>{metric.label}</span>
+                <strong>{metric.value}</strong>
+              </>
+            );
+            return metric.href ? (
+              <Link className={metric.status === 'ready' ? 'admin-card' : 'admin-card muted'} key={metric.label} href={metric.href}>
+                {content}
+              </Link>
+            ) : (
+              <article className={metric.status === 'ready' ? 'admin-card' : 'admin-card muted'} key={metric.label}>
+                {content}
+              </article>
+            );
+          })}
         </div>
         <section className="admin-panel">
           <div className="sectionhead compact">

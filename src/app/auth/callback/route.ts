@@ -1,7 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-
-const ADMIN_ROLES = new Set(['SUPER_ADMIN', 'ADMIN', 'EVENT_MANAGER', 'EDITOR', 'CHECKIN_OPERATOR', 'SPONSOR_MANAGER', 'ORGANIZER']);
+import { ADMIN_ROLES, resolvePostLoginTarget } from '@/lib/auth/shared';
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
@@ -22,26 +21,30 @@ export async function GET(request: NextRequest) {
 
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData.user) {
-    return NextResponse.redirect(new URL('/login?error=session_not_established', requestUrl.origin));
+    return NextResponse.redirect(new URL(`/login?error=session_not_established`, requestUrl.origin));
   }
 
-  // If the user is heading to an admin route, verify authorization now
-  // so we do not send unauthorized users deep into the admin shell.
-  if (next === '/admin' || next.startsWith('/admin/')) {
+  // Role-aware landing: membership is needed to authorize admin routes and
+  // to pick the default landing page when no explicit `next` was requested.
+  const targetsAdminRoute = next === '/admin' || next.startsWith('/admin/');
+  let isAdmin = false;
+
+  if (next === '/' || targetsAdminRoute) {
     const { data: memberships, error: memberError } = await supabase
       .from('organizer_members')
       .select('role')
       .eq('user_id', userData.user.id);
 
-    if (memberError) {
+    if (memberError && targetsAdminRoute) {
       return NextResponse.redirect(new URL(`/admin/unauthorized?reason=${encodeURIComponent(memberError.message)}`, requestUrl.origin));
     }
 
-    const hasAdmin = (memberships ?? []).some((m) => ADMIN_ROLES.has(String(m.role)));
-    if (!hasAdmin) {
+    isAdmin = (memberships ?? []).some((m) => (ADMIN_ROLES as readonly string[]).includes(String(m.role)));
+    if (targetsAdminRoute && !isAdmin) {
       return NextResponse.redirect(new URL('/admin/unauthorized', requestUrl.origin));
     }
   }
 
-  return NextResponse.redirect(new URL(next, requestUrl.origin));
+  const target = resolvePostLoginTarget(nextRaw, isAdmin);
+  return NextResponse.redirect(new URL(target, requestUrl.origin));
 }

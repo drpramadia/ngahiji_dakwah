@@ -4,8 +4,7 @@ import NgahijiApp, { type CatalogEvent } from '@/components/NgahijiApp';
 import type { CommunityRecord, StoryRecord } from '@/lib/ngahiji-content';
 import { getLiveStreamFeed } from '@/lib/live-streams/service';
 import type { LiveStreamFeed } from '@/lib/live-streams/types';
-import { getCurrentProfile } from '@/lib/auth/server';
-import { getRoleRedirect } from '@/lib/auth/shared';
+import { getViewerContext } from '@/lib/auth/server';
 
 export const revalidate = 300;
 
@@ -43,20 +42,22 @@ async function loadLive(): Promise<LiveStreamFeed | null> {
 
 export default async function Home() {
   // Parallel fetch to prevent 10s function timeout on cold starts.
-  const [catalog, content, liveFeed, profile] = await Promise.all([
+  const [catalog, content, liveFeed, viewerCtx] = await Promise.all([
     loadCatalog(),
     loadContent(),
     loadLive(),
-    getCurrentProfile()
+    getViewerContext()
   ]);
 
   const { events, error: catalogError } = catalog;
   const { stories, communities, error: contentError } = content;
+  const { profile, isAdmin } = viewerCtx;
     const viewer = profile
       ? {
           name: profile.full_name || profile.email || 'Member',
           role: profile.role,
-          homeHref: getRoleRedirect(profile.role)
+          isAdmin,
+          homeHref: isAdmin ? '/admin' : '/member'
         }
       : null;
 

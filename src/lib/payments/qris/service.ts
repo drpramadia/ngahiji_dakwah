@@ -5,38 +5,33 @@ import type { OrderSummary, OrderStatus, PaymentSettings, OrderWithContext } fro
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export type OrderWithContextAndProof = OrderWithContext & {
-  proof_public_url: string | null;
-  /** Backward compat alias — same value as proof_public_url. */
+  /** Short-lived signed URL (bucket `payment-proofs` is private). */
   proof_signed_url: string | null;
+  /** Backward compat alias — same value as proof_signed_url. */
+  proof_public_url: string | null;
 };
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+export type AdminPaymentsResult = {
+  orders: OrderWithContextAndProof[];
+  /** Non-null when the admin payments view cannot load (config or query failure). */
+  configError: string | null;
+};
+
+const PROOF_URL_TTL_SECONDS = 300;
 
 /**
- * Build a public URL for a payment-proofs storage path.
- * Bucket `payment-proofs` is set to public (see migration 20260911001400).
- * Path uses order UUIDs which are unguessable, so exposure risk is minimal.
+ * Admin client for payments — requires SUPABASE_SERVICE_ROLE_KEY.
+ * Admin pages are already role-guarded via requireAdmin(); reads must bypass
+ * buyer-scoped RLS, and a silently degraded anon client made the payments
+ * table appear empty with no visible error. Fail loud instead.
  */
-export function buildPaymentProofUrl(storagePath: string | null): string | null {
-  if (!storagePath || !SUPABASE_URL) return null;
-  const clean = storagePath.replace(/^\/+/, '');
-  return `${SUPABASE_URL}/storage/v1/object/public/payment-proofs/${clean}`;
-}
-
-/**
- * Try service-role client first (bypasses RLS, correct for admin pages that
- * are already role-guarded via requireAdmin()). If SUPABASE_SERVICE_ROLE_KEY
- * is not configured, fall back to the RLS-scoped anon client so at least
- * matching orders (per organizer_members policy) still show up.
- */
-async function getAdminClient(): Promise<{ client: SupabaseClient; mode: 'service' | 'anon' }> {
+async function requireServiceClient(): Promise<SupabaseClient> {
   try {
-    const client = createSupabaseServiceClient();
-    return { client, mode: 'service' };
+    return createSupabaseServiceClient();
   } catch (err) {
-    console.warn('[admin/payments] SUPABASE_SERVICE_ROLE_KEY missing, falling back to anon client:', err instanceof Error ? err.message : err);
-    const client = await createSupabaseServerClient();
-    return { client, mode: 'anon' };
+    throw new Error(
+      `Konfigurasi payments admin tidak lengkap: ${err instanceof Error ? err.message : err}`
+    );
   }
 }
 
@@ -65,11 +60,11 @@ export async function getOrderById(orderId: string): Promise<OrderSummary | null
 }
 
 /**
- * Admin query — service-role preferred, falls back to anon on missing key.
+ * Admin query — service-role client only (throws when config is missing).
  * SAFE: caller must call requireAdmin() first.
  */
 export async function getPendingPaymentsForAdmin(): Promise<OrderWithContext[]> {
-  const { client: supabase, mode } = await getAdminClient();
+  const supabase = await requireServiceClient();
   const { data, error } = await supabase
     .from('orders')
     .select(`id, event_id, buyer_id, status, subtotal_idr, fee_idr, discount_idr, total_idr, payment_proof_url, payment_uploaded_at, paid_at, verified_at, verified_by, rejection_reason, created_at,
@@ -81,10 +76,9 @@ export async function getPendingPaymentsForAdmin(): Promise<OrderWithContext[]> 
     .order('created_at', { ascending: false })
     .limit(100);
   if (error) {
-    console.error(`[getPendingPaymentsForAdmin] client=${mode} query error:`, error.message);
-    return [];
+    console.error('[getPendingPaymentsForAdmin] query error:', error.message);
+    throw new Error(`Gagal memuat data payments admin: ${error.message}`);
   }
-  console.log(`[getPendingPaymentsForAdmin] client=${mode} rows=${data?.length ?? 0}`);
 
   type EventRel = { title: string; slug: string };
   type TicketRel = { name: string };
@@ -120,29 +114,67 @@ export async function getPendingPaymentsForAdmin(): Promise<OrderWithContext[]> 
 }
 
 /**
- * Same as getPendingPaymentsForAdmin() but attaches a public URL for each
- * order's payment proof (no per-row click required).
+ * Same as getPendingPaymentsForAdmin() but attaches a short-lived signed URL
+ * for each order's payment proof (bucket `payment-proofs` is private; see
+ * migration 20260911001500 which reverts 20260911001400).
  *
- * Public URL construction:
- *   ${NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/payment-proofs/{path}
- *
- * Requires bucket `payment-proofs` to be public — see migration
- * 20260911001400_payment_proofs_public.sql. `proof_signed_url` is kept as an
- * alias for backward-compat with existing components.
+ * Never throws for page rendering: configuration or query failures are
+ * returned as `configError` so /admin/payments can show a visible warning
+ * instead of an empty table.
  */
-export async function getPendingPaymentsWithSignedProofs(): Promise<OrderWithContextAndProof[]> {
-  const orders = await getPendingPaymentsForAdmin();
-  return orders.map((o) => {
-    const url = buildPaymentProofUrl(o.payment_proof_url);
-    return { ...o, proof_public_url: url, proof_signed_url: url };
-  });
+export async function getPendingPaymentsWithSignedProofs(): Promise<AdminPaymentsResult> {
+  let orders: OrderWithContext[];
+  try {
+    orders = await getPendingPaymentsForAdmin();
+  } catch (err) {
+    console.error('[getPendingPaymentsWithSignedProofs]', err);
+    return {
+      orders: [],
+      configError: err instanceof Error ? err.message : 'Gagal memuat data payments admin.'
+    };
+  }
+
+  const withProofs = await Promise.all(
+    orders.map(async (o) => {
+      let url: string | null = null;
+      if (o.payment_proof_url) {
+        url = await createSignedProofUrl(o.payment_proof_url);
+      }
+      return { ...o, proof_signed_url: url, proof_public_url: url };
+    })
+  );
+  return { orders: withProofs, configError: null };
+}
+
+async function createSignedProofUrl(storagePath: string): Promise<string | null> {
+  try {
+    const supabase = await requireServiceClient();
+    const clean = storagePath.replace(/^\/+/, '');
+    const { data, error } = await supabase.storage
+      .from('payment-proofs')
+      .createSignedUrl(clean, PROOF_URL_TTL_SECONDS);
+    if (error || !data) {
+      console.error(`[createSignedProofUrl] failed for ${storagePath}:`, error?.message);
+      return null;
+    }
+    return data.signedUrl;
+  } catch (err) {
+    console.error('[createSignedProofUrl]', err);
+    return null;
+  }
 }
 
 export async function updateOrderStatus(orderId: string, status: OrderStatus, patch: Partial<OrderSummary> = {}): Promise<void> {
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase
+  const { count, error } = await supabase
     .from('orders')
-    .update({ status, ...patch })
+    .update({ status, ...patch }, { count: 'exact' })
     .eq('id', orderId);
   if (error) throw new Error(`Update order gagal: ${error.message}`);
+  if (!count) {
+    // Zero affected rows = RLS policy miss or wrong order id. This was a
+    // silent no-op before (buyer saw "upload sukses" but the order never
+    // reached WAITING_VERIFICATION) — fail loud now.
+    throw new Error(`Update order ${orderId} gagal: tidak ada baris yang berubah. Periksa kebijakan RLS atau status order.`);
+  }
 }

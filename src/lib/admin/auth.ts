@@ -1,9 +1,8 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { ADMIN_ROLES, isAdminRole } from '@/lib/auth/shared';
 
-export type AdminRole = 'SUPER_ADMIN' | 'ADMIN' | 'EVENT_MANAGER' | 'EDITOR' | 'CHECKIN_OPERATOR' | 'SPONSOR_MANAGER' | 'ORGANIZER';
-
-const allowedAdminRoles = new Set<string>(['SUPER_ADMIN', 'ADMIN', 'EVENT_MANAGER', 'EDITOR', 'CHECKIN_OPERATOR', 'SPONSOR_MANAGER', 'ORGANIZER']);
+export type AdminRole = (typeof ADMIN_ROLES)[number];
 
 export async function requireAdmin() {
   const supabase = await createSupabaseServerClient();
@@ -18,7 +17,7 @@ export async function requireAdmin() {
 
   if (roleError) throw new Error(`Unable to verify admin permissions: ${roleError.message}`);
 
-  const roles = (memberships ?? []).filter((membership) => allowedAdminRoles.has(String(membership.role)));
+  const roles = (memberships ?? []).filter((membership) => isAdminRole(String(membership.role)));
   if (!roles.length) redirect('/admin/unauthorized');
 
   return { user, roles };
