@@ -65,12 +65,16 @@ export async function getOrderById(orderId: string): Promise<OrderSummary | null
  */
 export async function getPendingPaymentsForAdmin(): Promise<OrderWithContext[]> {
   const supabase = await requireServiceClient();
+  // NOTE: orders.buyer_id has an FK to auth.users(id) only — there is no FK
+  // between orders and public.profiles, so PostgREST cannot embed
+  // `buyer:profiles(...)` ("Could not find a relationship between 'orders' and
+  // 'profiles' in the schema cache"). Buyer info is fetched in a second
+  // batched query and joined in JS instead.
   const { data, error } = await supabase
     .from('orders')
     .select(`id, event_id, buyer_id, status, subtotal_idr, fee_idr, discount_idr, total_idr, payment_proof_url, payment_uploaded_at, paid_at, verified_at, verified_by, rejection_reason, created_at,
              event:events(title, slug),
-             items:order_items(quantity, ticket:ticket_types(name)),
-             buyer:profiles(email, full_name)`)
+             items:order_items(quantity, ticket:ticket_types(name))`)
     .in('status', ['PENDING_PAYMENT', 'WAITING_VERIFICATION', 'PAID', 'FAILED', 'EXPIRED'])
     .order('payment_uploaded_at', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
@@ -83,11 +87,9 @@ export async function getPendingPaymentsForAdmin(): Promise<OrderWithContext[]> 
   type EventRel = { title: string; slug: string };
   type TicketRel = { name: string };
   type ItemRel = { quantity: number; ticket: TicketRel | TicketRel[] | null };
-  type BuyerRel = { email: string | null; full_name: string | null };
   type Row = OrderSummary & {
     event: EventRel | EventRel[] | null;
     items: ItemRel[] | null;
-    buyer: BuyerRel | BuyerRel[] | null;
   };
 
   function pick<T>(rel: T | T[] | null | undefined): T | null {
@@ -96,9 +98,27 @@ export async function getPendingPaymentsForAdmin(): Promise<OrderWithContext[]> 
   }
 
   const rows = (data ?? []) as unknown as Row[];
+
+  const buyerIds = [...new Set(rows.map((r) => r.buyer_id).filter((id): id is string => Boolean(id)))];
+  const buyersById = new Map<string, { email: string | null; full_name: string | null }>();
+  if (buyerIds.length > 0) {
+    const { data: buyers, error: buyersError } = await supabase
+      .from('profiles')
+      .select('id, email, full_name')
+      .in('id', buyerIds);
+    if (buyersError) {
+      // Non-fatal: buyer columns fall back to null instead of failing the page.
+      console.error('[getPendingPaymentsForAdmin] profiles lookup failed:', buyersError.message);
+    } else {
+      for (const b of (buyers ?? []) as { id: string; email: string | null; full_name: string | null }[]) {
+        buyersById.set(b.id, { email: b.email, full_name: b.full_name });
+      }
+    }
+  }
+
   return rows.map((row) => {
     const ev = pick(row.event);
-    const buyer = pick(row.buyer);
+    const buyer = buyersById.get(row.buyer_id) ?? null;
     const firstItem = row.items?.[0] ?? null;
     const ticket = pick(firstItem?.ticket);
     return {
