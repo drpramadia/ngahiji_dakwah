@@ -169,9 +169,11 @@ export async function approvePaymentAction(formData: FormData): Promise<void> {
     .eq('id', orderId)
     .maybeSingle();
   if (order) {
+    // 'PAID' is the valid post-payment status per the registrations_status_check
+    // constraint ('CONFIRMED' is not in the allowed list and violated it).
     const { count: regCount, error: regError } = await supabase
       .from('registrations')
-      .update({ status: 'CONFIRMED' }, { count: 'exact' })
+      .update({ status: 'PAID' }, { count: 'exact' })
       .eq('id', order.registration_id);
     if (regError) throw new Error(`Approve order ${orderId} gagal update registrasi: ${regError.message}`);
     if (!regCount) throw new Error(`Approve order ${orderId} gagal: registrasi ${order.registration_id} tidak ditemukan atau tidak boleh diubah.`);
