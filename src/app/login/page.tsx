@@ -6,13 +6,22 @@ import { signOutPublic } from '@/app/actions/auth';
 
 export const metadata = { title: 'Masuk - Ngahiji' };
 
+const AUTH_ERROR_MESSAGES: Record<string, string> = {
+  missing_code: 'Tautan login tidak lengkap. Kirim ulang OTP / magic link.',
+  session_not_established: 'Sesi login gagal dibuat. Coba kirim ulang OTP / magic link.',
+  recovery_required: 'Tautan reset password tidak berlaku atau sudah kedaluwarsa. Klik "Lupa password?" untuk minta link baru.'
+};
+
 type Props = {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; error?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: Props) {
-  const { next } = await searchParams;
+  const { next, error: errorParam } = await searchParams;
   const profile = await getCurrentProfile();
+  const authError = errorParam
+    ? AUTH_ERROR_MESSAGES[errorParam] ?? `Login gagal: ${errorParam.slice(0, 200)}`
+    : null;
 
   return (
     <main className="auth-shell">
@@ -45,6 +54,7 @@ export default async function LoginPage({ searchParams }: Props) {
               <p>Satu akun untuk event, kajian, media, dan komunitas Ngahiji.</p>
             </div>
             <div className="auth-panel-wrap">
+              {authError && <p className="admin-error" role="alert">{authError}</p>}
               <PublicAuthPanel mode="login" next={next || '/'} />
             </div>
           </>

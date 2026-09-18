@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import AdminLoginForm from './AdminLoginForm';
+import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm';
 
 export const metadata = {
   title: 'Admin Login - Ngahiji'
@@ -14,6 +15,7 @@ export default function AdminLoginPage() {
         <h1>Admin login.</h1>
         <p>Masuk dengan email dan password admin Supabase. Setelah login, akses tetap membutuhkan role admin di <code>organizer_members</code>.</p>
         <AdminLoginForm />
+        <ForgotPasswordForm />
       </section>
     </main>
   );

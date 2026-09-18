@@ -36,7 +36,7 @@ Working now:
 
 - Next.js App Router + TypeScript app shell.
 - Public Ngahiji homepage sections from the prototype: hero, events, live, media, community, moments, organizer CTA, closing, footer, and mobile dock.
-- Public `Masuk`, `Join Ngahiji`, and mobile `Profile` entry points open a Supabase Auth popup with Google, email Magic Link, phone/WhatsApp OTP, and direct account creation options.
+- Public `Masuk`, `Join Ngahiji`, and mobile `Profile` entry points open a Supabase Auth panel with password signup/login, Google, email Magic Link + OTP code, phone/WhatsApp OTP, and "Lupa password" email reset (`/auth/reset-password`).
 - Event cards loaded through the catalog service boundary.
 - Event detail modal.
 - Multi-participant ticket simulation flow with payment gateway simulation and ticket/QR preview.
@@ -98,8 +98,9 @@ Never use `supabase db reset` against the linked remote project.
 
 Routes:
 
-- `/admin/login` - Supabase Auth magic-link login.
+- `/admin/login` - Supabase Auth password login, with "Lupa password" reset link.
 - `/auth/callback` - exchanges Supabase auth code for a session cookie.
+- `/auth/reset-password` - sets a new password after the recovery-link session is established; anonymous visitors are bounced to `/login?error=recovery_required`.
 - `/admin` - server-side protected dashboard.
 - `/admin/events`, `/admin/tickets`, `/admin/orders`, `/admin/attendees`, `/admin/check-in`, `/admin/media`, `/admin/live`, `/admin/community`, `/admin/sponsors`, `/admin/analytics`, `/admin/settings` - protected CMS module entry points.
 
@@ -271,7 +272,7 @@ Current status:
 
 Public ticket/payment UI remains explicitly marked as simulation until provider configuration, server-side payment verification, official ticket issuance, and QR validation are implemented.
 
-Google OAuth and phone/WhatsApp OTP require matching providers to be enabled in Supabase Auth. Direct account creation stores users in Supabase Auth and sends them to `/profile` after verification/session creation.
+Password signup, password login, email OTP/magic link, and password reset use Supabase Auth's built-in email flow: configure a real SMTP sender (verified domain) in the Supabase dashboard and allowlist `http://localhost:3000/auth/callback` plus the production `/auth/callback` in Authentication → URL Configuration, otherwise emails silently fall back to the Site URL. Password signup sends a confirmation email; after confirming, users sign in with email + password. OTP-only or Google-only accounts can set a password via "Lupa password" → recovery link → `/auth/reset-password`. Google OAuth and phone/WhatsApp OTP additionally require matching providers to be enabled in Supabase Auth.
 
 ## Original Files
 
